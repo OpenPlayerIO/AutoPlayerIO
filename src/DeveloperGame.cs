@@ -109,13 +109,20 @@ namespace AutoPlayerIO
         /// <param name="gameDB"> The database the connection has access to. By default it is set to 'Default'. If set to null, 'Default' will be used. </param>
         /// <param name="tablePrivileges"> The BigDB privileges to give this connection </param>
         /// <param name="sharedSecret"> If the authentication method is Basic, the sharedSecret specified here will be used. </param>
-        public async Task CreateConnectionAsync(Connection connection, string description, AuthenticationMethod authenticationMethod, string gameDB, List<(Table table, bool can_load_by_keys, bool can_create, bool can_load_by_indexes, bool can_delete, bool creator_has_full_rights, bool can_save)> tablePrivileges, string sharedSecret = null, CancellationToken cancellationToken = default)
+        public async Task CreateConnectionAsync(
+            Connection connection,
+            string description,
+            AuthenticationMethod authenticationMethod,
+            string gameDB,
+            List<(Table table, bool can_load_by_keys, bool can_create, bool can_load_by_indexes, bool can_delete, bool creator_has_full_rights, bool can_save)> tablePrivileges,
+            string sharedSecret = null,
+            CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrEmpty(connection.Name))
                 throw new ArgumentException("Unable to create connection - connectionId cannot be null or empty.");
 
             if (authenticationMethod == AuthenticationMethod.BasicRequiresAuthentication && string.IsNullOrEmpty(sharedSecret))
-                throw new Exception($"Unabel to create connection '{connection.Name}' - when using BasicRequiresAuthentication as your authentication method, you must provide a non-empty sharedSecret.");
+                throw new Exception($"Unable to create connection '{connection.Name}' - when using BasicRequiresAuthentication as your authentication method, you must provide a non-empty sharedSecret.");
 
             if (string.IsNullOrEmpty(gameDB))
                 gameDB = "Default";
