@@ -17,19 +17,20 @@ using System.Threading.Tasks;
 
 namespace PlayerIO
 {
-    // Rather than having some ugly OpenAsync with .Results to convert Task<T>s to Ts, having his class allows us to
-    // execute the exact method of AngleSharp which takes an IResponse. This prevents that .Result hell, and allows
-    // for more truly asynchronous code.
-    //
-    // The primary usecase of this is in FlurlClientExtensions.LoadDocumentAsync(IFlurlRequest, CancellationToken),
-    // which utilizes the AngleSharpHttpResponseMessageResponseExtensions.ToAngleSharp method.
-
-    // yes the name is ugly, idk what to name it
-    internal class AngleSharpHttpResponseMessageResponse : IResponse
+    /// <summary>
+    /// Rather than having some ugly OpenAsync with .Results to convert <see cref="Task{T}"/>s to Ts, having his class allows us to
+    /// execute the exact method of AngleSharp which takes an <see cref="IResponse"/>. This prevents that .Result hell, and allows
+    /// for more truly asynchronous code.
+    /// <para>
+    /// The primary usecase of this is in <see cref="FlurlClientExtensions.LoadDocumentAsync(IFlurlRequest, CancellationToken)"/>,
+    /// which utilizes <see cref="ASMessageResponseExtensions.ToAngleSharpResponse(IFlurlRequest, Func{IFlurlRequest, Task{HttpResponseMessage}}?, CancellationToken)"/>.
+    /// </para>
+    /// </summary>
+    internal class ASMessageResponse : IResponse
     {
         private readonly HttpResponseMessage _httpResponseMessage;
 
-        public AngleSharpHttpResponseMessageResponse(Url address, HttpResponseMessage httpResponseMessage, Stream content)
+        public ASMessageResponse(Url address, HttpResponseMessage httpResponseMessage, Stream content)
         {
             Address = address;
             _httpResponseMessage = httpResponseMessage;
@@ -48,9 +49,9 @@ namespace PlayerIO
         }
     }
 
-    internal static class AngleSharpHttpResponseMessageResponseExtensions
+    internal static class ASMessageResponseExtensions
     {
-        public static async Task<AngleSharpHttpResponseMessageResponse> ToAngleSharpResponse(
+        public static async Task<ASMessageResponse> ToAngleSharpResponse(
             this IFlurlRequest flurlRequest,
             Func<IFlurlRequest, Task<HttpResponseMessage>>? executionPredicate,
             CancellationToken cancellationToken = default
@@ -69,7 +70,7 @@ namespace PlayerIO
 
             var content = await httpResponseMessage.Content.ReadAsStreamAsync().ConfigureAwait(false);
 
-            return new AngleSharpHttpResponseMessageResponse(url, httpResponseMessage, content);
+            return new ASMessageResponse(url, httpResponseMessage, content);
         }
     }
 }
