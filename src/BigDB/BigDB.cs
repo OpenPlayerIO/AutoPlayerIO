@@ -64,15 +64,6 @@ namespace PlayerIO
         /// </summary>
         /// <param name="name"> The name of the table. </param>
         /// <param name="description"> A description for the table </param>
-        [Obsolete("Please use " + nameof(CreateTableAsync) + ".")]
-        public void CreateTable(string name, string description)
-            => CreateTableAsync(name, description).GetAwaiter().GetResult();
-
-        /// <summary>
-        /// Create a table in BigDB.
-        /// </summary>
-        /// <param name="name"> The name of the table. </param>
-        /// <param name="description"> A description for the table </param>
         public async Task CreateTableAsync(string name, string description)
         {
             if (this.Tables.Any(table => string.Equals(table.Name, name, StringComparison.CurrentCultureIgnoreCase)))
@@ -84,15 +75,6 @@ namespace PlayerIO
                 Description = description ?? ""
             }).ConfigureAwait(false);
         }
-
-        /// <summary>
-        /// Export tables to the specified email address.
-        /// </summary>
-        /// <param name="tables"> A list of tables to export. </param>
-        /// <param name="emailAddress"> The email address to send the exported JSON files to. </param>
-        [Obsolete("Please use " + nameof(ExportAsync) + ".")]
-        public void Export(IEnumerable<Table> tables, string emailAddress)
-            => ExportAsync(tables, emailAddress).GetAwaiter().GetResult();
 
         /// <summary>
         /// Export tables to the specified email address.

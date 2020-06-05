@@ -53,18 +53,6 @@ namespace PlayerIO
         /// </summary>
         public string GameId { get; }
 
-        /// <summary>
-        /// A class used for managing BigDB for this game.
-        /// </summary>
-        [Obsolete("Please use " + nameof(LoadBigDBAsync) + ".")]
-        public BigDB BigDB => LoadBigDBAsync().GetAwaiter().GetResult();
-
-        /// <summary>
-        /// A list of connections for this game.
-        /// </summary>
-        [Obsolete("Please use " + nameof(LoadConnectionsAsync) + ".")]
-        public List<Connection> Connections => LoadConnectionsAsync().GetAwaiter().GetResult();
-
         // internal is used to workaround the other parts of this library requiring FlurlClient
         internal readonly FlurlClient _client;
 
@@ -111,19 +99,6 @@ namespace PlayerIO
 
             return response.StatusCode == System.Net.HttpStatusCode.OK;
         }
-
-        /// <summary>
-        /// Creates a connection in the 'Settings' panel.
-        /// </summary>
-        /// <param name="connectionId"> The name of the connnection. </param>
-        /// <param name="description"> The description of the connection. </param>
-        /// <param name="authenticationMethod"> The method the connection will use for authentication. </param>
-        /// <param name="gameDB"> The database the connection has access to. By default it is set to 'Default'. If set to null, 'Default' will be used. </param>
-        /// <param name="tablePrivileges"> The BigDB privileges to give this connection </param>
-        /// <param name="sharedSecret"> If the authentication method is Basic, the sharedSecret specified here will be used. </param>
-        [Obsolete("Please use " + nameof(CreateConnectionAsync) + ".")]
-        public void CreateConnection(string connectionId, string description, AuthenticationMethod authenticationMethod, string gameDB, List<(Table table, bool can_load_by_keys, bool can_create, bool can_load_by_indexes, bool can_delete, bool creator_has_full_rights, bool can_save)> tablePrivileges, string sharedSecret = null, CancellationToken cancellationToken = default)
-            => CreateConnectionAsync(new Connection(connectionId, string.Empty), description, authenticationMethod, gameDB, tablePrivileges, sharedSecret, cancellationToken).GetAwaiter().GetResult();
 
         /// <summary>
         /// Creates a connection in the 'Settings' panel.
