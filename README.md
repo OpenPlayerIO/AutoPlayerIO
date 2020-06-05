@@ -1,5 +1,5 @@
-# PlayerIO
-A library to parse the Player.IO website and allow programmatic actions.
+# AutoPlayerIO
+A library to parse the Player.IO website and allow developers to automate web actions.
 
 Please note that this library is not officially supported by Player.IO and can become out-of-date at any point.
 
