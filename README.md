@@ -17,7 +17,6 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 This software was designed to be used only for research purposes.
-Clinical uses are not recommended, and have never been evaluated.
 This software comes with no warranties of any kind whatsoever,
 and may not be useful for anything.  Use it at your own risk!
 If these terms are not acceptable, you aren't allowed to use the code.
