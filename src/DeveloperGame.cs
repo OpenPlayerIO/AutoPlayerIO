@@ -100,6 +100,7 @@ namespace AutoPlayerIO
             return response.StatusCode == HttpStatusCode.OK;
         }
 
+
         /// <summary>
         /// Creates a connection in the 'Settings' panel.
         /// </summary>
@@ -204,6 +205,9 @@ namespace AutoPlayerIO
 
         public Task<BigDB> LoadBigDBAsync(CancellationToken cancellationToken = default)
             => BigDB.LoadAsync(_client, this.XSRFToken, this, cancellationToken);
+
+        public async Task<PayVault> LoadPayVaultAsync(CancellationToken cancellationToken = default)
+            => await PayVault.LoadAsync(_client, this.XSRFToken, this, cancellationToken);
 
         public async Task<List<Connection>> LoadConnectionsAsync(CancellationToken cancellationToken = default)
         {
