@@ -216,8 +216,8 @@ namespace PlayerIO
                     ((IDictionary<string, object>)arguments).Add(privilege.id + "-cansave", "on");
             }
 
-            var create_connection_response = _client.Request($"/my/connections/create/{this.NavigationId}/{this.XSRFToken}").PostUrlEncodedAsync((object)arguments).Result;
-            var edit_connection_response = _client.Request($"/my/connections/edit/{this.NavigationId}/{arguments.Identifier}/{this.XSRFToken}").PostUrlEncodedAsync((object)arguments).Result;
+            var create_connection_response = await _client.Request($"/my/connections/create/{this.NavigationId}/{this.XSRFToken}").PostUrlEncodedAsync((object)arguments).ConfigureAwait(false);
+            var edit_connection_response = await _client.Request($"/my/connections/edit/{this.NavigationId}/{arguments.Identifier}/{this.XSRFToken}").PostUrlEncodedAsync((object)arguments).ConfigureAwait(false);
         }
 
         public Task<BigDB> LoadBigDBAsync(CancellationToken cancellationToken = default)
