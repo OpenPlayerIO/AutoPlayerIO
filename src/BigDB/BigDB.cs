@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+
 using AngleSharp;
 using AngleSharp.Dom;
 using Flurl.Http;
@@ -10,17 +13,15 @@ namespace PlayerIO
 {
     public class BigDB
     {
-        public List<Table> Tables { get; }
-
-        internal BigDB(DeveloperGame parent)
+        public static async Task<BigDB> LoadAsync(FlurlClient client, string xsrfToken, DeveloperGame game, CancellationToken cancellationToken = default)
         {
-            this.Game = parent;
-            this.Tables = new List<Table>();
+            var tables = new List<Table>();
 
-            var bigdb_details = BrowsingContext.New(Configuration.Default)
-                .OpenAsync(req => req.Content(this.Game.Account.Client.Request($"/my/bigdb/tables/{this.Game.NavigationId}/{this.Game.XSRFToken}").GetStreamAsync().Result)).Result;
+            var bigdbDetails = await client.Request($"/my/bigdb/tables/{game.NavigationId}/{xsrfToken}")
+                .LoadDocumentAsync(cancellationToken)
+                .ConfigureAwait(false);
 
-            var rows = bigdb_details.QuerySelector(".innermainrail").QuerySelector(".box").QuerySelector("tbody").QuerySelectorAll("tr.colrow");
+            var rows = bigdbDetails.QuerySelector(".innermainrail").QuerySelector(".box").QuerySelector("tbody").QuerySelectorAll("tr.colrow");
             var contents = rows.Select(row => new
             {
                 Name = row.QuerySelectorAll("a.big").First()?.TextContent,
@@ -30,13 +31,32 @@ namespace PlayerIO
 
             foreach (var table in contents)
             {
-                this.Tables.Add(new Table()
+                tables.Add(new Table()
                 {
                     Name = table.Name,
                     Description = table.Description,
                     ExtraDetails = table.ExtraDetails
                 });
             }
+
+            return new BigDB(client, xsrfToken, game, tables);
+        }
+
+        public List<Table> Tables { get; }
+
+        // TODO: should this be public?
+        public DeveloperGame Game { get; }
+
+        private readonly FlurlClient _client;
+        private readonly string _xsrfToken;
+
+        private BigDB(FlurlClient client, string xsrfToken, DeveloperGame game, List<Table> tables)
+        {
+            _client = client;
+            _xsrfToken = xsrfToken;
+
+            Game = game;
+            Tables = tables;
         }
 
         /// <summary>
@@ -44,16 +64,16 @@ namespace PlayerIO
         /// </summary>
         /// <param name="name"> The name of the table. </param>
         /// <param name="description"> A description for the table </param>
-        public void CreateTable(string name, string description)
+        public async Task CreateTableAsync(string name, string description)
         {
-            if (this.Tables.Any(table => table.Name.ToLower() == name.ToLower()))
+            if (this.Tables.Any(table => string.Equals(table.Name, name, StringComparison.CurrentCultureIgnoreCase)))
                 throw new InvalidOperationException($"Unable to create table. A table already exists with the name '{name}'");
 
-            this.Game.Account.Client.Request($"/my/bigdb/createtable/{this.Game.Name.ToLower()}/{this.Game.XSRFToken}").PostUrlEncodedAsync(new
+            await _client.Request($"/my/bigdb/createtable/{this.Game.Name.ToLower()}/{_xsrfToken}").PostUrlEncodedAsync(new
             {
                 Name = name,
                 Description = description ?? ""
-            });
+            }).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -61,9 +81,9 @@ namespace PlayerIO
         /// </summary>
         /// <param name="tables"> A list of tables to export. </param>
         /// <param name="emailAddress"> The email address to send the exported JSON files to. </param>
-        public void Export(IEnumerable<Table> tables, string emailAddress)
+        public async Task ExportAsync(IEnumerable<Table> tables, string emailAddress)
         {
-            if (tables == null || tables.Count() == 0)
+            if (tables?.Any() != true)
                 throw new ArgumentException("You must specify at least one table to export.");
 
             if (string.IsNullOrEmpty(emailAddress) || !emailAddress.Contains('@'))
@@ -75,9 +95,9 @@ namespace PlayerIO
             foreach (var table in tables)
                 ((IDictionary<string, object>)arguments).Add(table.Name, "on");
 
-            this.Game.Account.Client.Request($"/my/bigdb/exporttables/{this.Game.Name.ToLower()}/{this.Game.XSRFToken}").PostUrlEncodedAsync((object)arguments);
+            await _client.Request($"/my/bigdb/exporttables/{this.Game.Name.ToLower()}/{_xsrfToken}")
+                .PostUrlEncodedAsync((object)arguments)
+                .ConfigureAwait(false);
         }
-
-        internal DeveloperGame Game { get; set; }
     }
 }
