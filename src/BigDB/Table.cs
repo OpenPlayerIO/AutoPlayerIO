@@ -1,5 +1,8 @@
 ﻿namespace AutoPlayerIO
 {
+    /// <summary>
+    /// A table in BigDB.
+    /// </summary>
     public class Table
     {
         /// <summary>
@@ -19,7 +22,6 @@
 
         internal Table()
         {
-
         }
     }
 }

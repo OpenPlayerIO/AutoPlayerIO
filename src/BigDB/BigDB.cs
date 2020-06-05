@@ -43,8 +43,6 @@ namespace AutoPlayerIO
         }
 
         public List<Table> Tables { get; }
-
-        // TODO: should this be public?
         public DeveloperGame Game { get; }
 
         private readonly FlurlClient _client;
@@ -55,8 +53,8 @@ namespace AutoPlayerIO
             _client = client;
             _xsrfToken = xsrfToken;
 
-            Game = game;
-            Tables = tables;
+            this.Game = game;
+            this.Tables = tables;
         }
 
         /// <summary>

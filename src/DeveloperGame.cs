@@ -59,10 +59,10 @@ namespace AutoPlayerIO
         {
             _client = client;
 
-            XSRFToken = xsrfToken;
-            Name = name;
-            NavigationId = navigationId;
-            GameId = gameId;
+            this.XSRFToken = xsrfToken;
+            this.Name = name;
+            this.NavigationId = navigationId;
+            this.GameId = gameId;
         }
 
         /// <summary>
@@ -195,7 +195,7 @@ namespace AutoPlayerIO
         }
 
         public Task<BigDB> LoadBigDBAsync(CancellationToken cancellationToken = default)
-            => BigDB.LoadAsync(_client, XSRFToken, this, cancellationToken);
+            => BigDB.LoadAsync(_client, this.XSRFToken, this, cancellationToken);
 
         public async Task<List<Connection>> LoadConnectionsAsync(CancellationToken cancellationToken = default)
         {

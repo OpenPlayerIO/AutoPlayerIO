@@ -59,9 +59,9 @@ namespace AutoPlayerIO
 
         private DeveloperAccount(string username, string email, IReadOnlyList<DeveloperGame> games)
         {
-            Username = username;
-            Email = email;
-            Games = games;
+            this.Username = username;
+            this.Email = email;
+            this.Games = games;
         }
     }
 }
