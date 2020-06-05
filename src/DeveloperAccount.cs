@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace PlayerIO
+namespace AutoPlayerIO
 {
     public class DeveloperAccount
     {

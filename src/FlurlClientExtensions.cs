@@ -6,7 +6,7 @@ using Flurl.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace PlayerIO
+namespace AutoPlayerIO
 {
     internal static class FlurlClientExtensions
     {

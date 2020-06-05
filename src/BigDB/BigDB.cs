@@ -9,7 +9,7 @@ using AngleSharp;
 using AngleSharp.Dom;
 using Flurl.Http;
 
-namespace PlayerIO
+namespace AutoPlayerIO
 {
     public class BigDB
     {

@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 #nullable enable
 
-namespace PlayerIO
+namespace AutoPlayerIO
 {
     /// <summary>
     /// Rather than having some ugly OpenAsync with .Results to convert <see cref="Task{T}"/>s to Ts, having his class allows us to

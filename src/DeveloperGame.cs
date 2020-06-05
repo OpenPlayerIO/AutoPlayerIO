@@ -10,7 +10,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace PlayerIO
+namespace AutoPlayerIO
 {
     public partial class DeveloperGame
     {
@@ -196,7 +196,7 @@ namespace PlayerIO
         }
 
         public Task<BigDB> LoadBigDBAsync(CancellationToken cancellationToken = default)
-            => global::PlayerIO.BigDB.LoadAsync(_client, XSRFToken, this, cancellationToken);
+            => BigDB.LoadAsync(_client, XSRFToken, this, cancellationToken);
 
         public async Task<List<Connection>> LoadConnectionsAsync(CancellationToken cancellationToken = default)
         {

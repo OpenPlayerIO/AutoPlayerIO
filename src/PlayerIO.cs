@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace PlayerIO
+namespace AutoPlayerIO
 {
     public static class PlayerIO
     {

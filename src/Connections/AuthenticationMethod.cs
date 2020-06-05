@@ -1,4 +1,4 @@
-﻿namespace PlayerIO
+﻿namespace AutoPlayerIO
 {
     public partial class DeveloperGame
     {
