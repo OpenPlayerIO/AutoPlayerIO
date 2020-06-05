@@ -10,19 +10,7 @@ using Flurl.Http;
 
 namespace PlayerIO
 {
-    public class Connection
-    {
-        public string Name { get; }
-        public string Description { get;}
-
-        internal Connection(string name, string description)
-        {
-            this.Name = name;
-            this.Description = description;
-        }
-    }
-
-    public class DeveloperGame
+    public partial class DeveloperGame
     {
         internal string XSRFToken { get; }
 
@@ -70,29 +58,6 @@ namespace PlayerIO
             this.XSRFToken = (navigation_menu.First() as IHtmlAnchorElement).PathName.Split('/').Last();
         }
 
-        private BigDB GetBigDB() => new BigDB(this);
-
-        private List<Connection> GetConnections()
-        {
-            var connections = new List<Connection>();
-
-            var settings_details = BrowsingContext.New(Configuration.Default)
-               .OpenAsync(req => req.Content(this.Account.Client.Request($"/my/games/settings/{this.NavigationId}/{this.XSRFToken}").GetStreamAsync().Result)).Result;
-
-            var section = settings_details.QuerySelectorAll("section").Where(x => x.GetElementsByTagName("h3").Any(t => t.TextContent == "Connections")).First();
-            var rows = section.QuerySelectorAll("tr.colrow");
-            var contents = rows.Select(row => new
-            {
-                Name = row.QuerySelectorAll("a").First()?.TextContent,
-                Description = row.QuerySelectorAll("div").First()?.TextContent,
-            });
-
-            foreach (var table in contents)
-                connections.Add(new Connection(table.Name, table.Description));
-
-            return connections;
-        }
-
         /// <summary>
         /// Delete the specified connection.
         /// </summary>
@@ -128,15 +93,6 @@ namespace PlayerIO
         }
 
         /// <summary>
-        /// An authentication method to use for the connection.
-        /// </summary>
-        public enum Authentication
-        {
-            Basic,
-            BasicRequiresAuthentication
-        }
-
-        /// <summary>
         /// Creates a connection in the 'Settings' panel.
         /// </summary>
         /// <param name="connectionId"> The name of the connnection. </param>
@@ -145,7 +101,7 @@ namespace PlayerIO
         /// <param name="gameDB"> The database the connection has access to. By default it is set to 'Default'. If set to null, 'Default' will be used. </param>
         /// <param name="table_privileges"> The BigDB privileges to give this connection </param>
         /// <param name="sharedSecret"> If the authentication method is Basic, the sharedSecret specified here will be used. </param>
-        public void CreateConnection(string connectionId, string description, Authentication authenticationMethod, string gameDB, List<(Table table, bool can_load_by_keys, bool can_create, bool can_load_by_indexes, bool can_delete, bool creator_has_full_rights, bool can_save)> table_privileges, string sharedSecret = null)
+        public void CreateConnection(string connectionId, string description, AuthenticationMethod authenticationMethod, string gameDB, List<(Table table, bool can_load_by_keys, bool can_create, bool can_load_by_indexes, bool can_delete, bool creator_has_full_rights, bool can_save)> table_privileges, string sharedSecret = null)
         {
             if (string.IsNullOrEmpty(connectionId))
                 throw new ArgumentException("Unable to create connection - connectionId cannot be null or empty.");
@@ -156,7 +112,7 @@ namespace PlayerIO
             if (this.Connections.Any(t => t.Name == connectionId))
                 throw new Exception($"Unable to create connection '{connectionId}' - a connection already exists with that name.");
 
-            if (authenticationMethod == Authentication.BasicRequiresAuthentication && string.IsNullOrEmpty(sharedSecret))
+            if (authenticationMethod == AuthenticationMethod.BasicRequiresAuthentication && string.IsNullOrEmpty(sharedSecret))
                 throw new Exception($"Unabel to create connection '{connectionId}' - when using BasicRequiresAuthentication as your authentication method, you must provide a non-empty sharedSecret.");
 
             if (string.IsNullOrEmpty(gameDB))
@@ -199,11 +155,11 @@ namespace PlayerIO
 
             switch (authenticationMethod)
             {
-                case Authentication.Basic:
+                case AuthenticationMethod.Basic:
                     arguments.AuthProvider = "basic256";
                     break;
 
-                case Authentication.BasicRequiresAuthentication:
+                case AuthenticationMethod.BasicRequiresAuthentication:
                     arguments.AuthProvider = "basic256";
                     arguments.Basic256RequiresAuth = "on";
                     arguments.Basic256AuthSharedSecret = sharedSecret;
@@ -233,6 +189,29 @@ namespace PlayerIO
 
             var create_connection_response = this.Account.Client.Request($"/my/connections/create/{this.NavigationId}/{this.XSRFToken}").PostUrlEncodedAsync((object)arguments).Result;
             var edit_connection_response = this.Account.Client.Request($"/my/connections/edit/{this.NavigationId}/{arguments.Identifier}/{this.XSRFToken}").PostUrlEncodedAsync((object)arguments).Result;
+        }
+
+        private BigDB GetBigDB() => new BigDB(this);
+
+        private List<Connection> GetConnections()
+        {
+            var connections = new List<Connection>();
+
+            var settings_details = BrowsingContext.New(Configuration.Default)
+               .OpenAsync(req => req.Content(this.Account.Client.Request($"/my/games/settings/{this.NavigationId}/{this.XSRFToken}").GetStreamAsync().Result)).Result;
+
+            var section = settings_details.QuerySelectorAll("section").Where(x => x.GetElementsByTagName("h3").Any(t => t.TextContent == "Connections")).First();
+            var rows = section.QuerySelectorAll("tr.colrow");
+            var contents = rows.Select(row => new
+            {
+                Name = row.QuerySelectorAll("a").First()?.TextContent,
+                Description = row.QuerySelectorAll("div").First()?.TextContent,
+            });
+
+            foreach (var table in contents)
+                connections.Add(new Connection(table.Name, table.Description));
+
+            return connections;
         }
 
         internal DeveloperAccount Account { get; set; }
