@@ -17,6 +17,13 @@ using System.Threading.Tasks;
 
 namespace PlayerIO
 {
+    // Rather than having some ugly OpenAsync with .Results to convert Task<T>s to Ts, having his class allows us to
+    // execute the exact method of AngleSharp which takes an IResponse. This prevents that .Result hell, and allows
+    // for more truly asynchronous code.
+    //
+    // The primary usecase of this is in FlurlClientExtensions.LoadDocumentAsync(IFlurlRequest, CancellationToken),
+    // which utilizes the AngleSharpHttpResponseMessageResponseExtensions.ToAngleSharp method.
+
     // yes the name is ugly, idk what to name it
     internal class AngleSharpHttpResponseMessageResponse : IResponse
     {

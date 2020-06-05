@@ -10,7 +10,7 @@ namespace PlayerIO
 {
     public static class PlayerIO
     {
-        internal const string PlayerIOURL = "https://playerio.com";
+        public const string PlayerIOURL = "https://playerio.com";
 
         public static async Task<DeveloperAccount> LoginAsync(string username, string password, CancellationToken cancellationToken = default)
         {
