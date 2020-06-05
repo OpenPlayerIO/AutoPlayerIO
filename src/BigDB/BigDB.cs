@@ -64,7 +64,16 @@ namespace PlayerIO
         /// </summary>
         /// <param name="name"> The name of the table. </param>
         /// <param name="description"> A description for the table </param>
-        public async Task CreateTable(string name, string description)
+        [Obsolete("Please use " + nameof(CreateTableAsync) + ".")]
+        public void CreateTable(string name, string description)
+            => CreateTableAsync(name, description).GetAwaiter().GetResult();
+
+        /// <summary>
+        /// Create a table in BigDB.
+        /// </summary>
+        /// <param name="name"> The name of the table. </param>
+        /// <param name="description"> A description for the table </param>
+        public async Task CreateTableAsync(string name, string description)
         {
             if (this.Tables.Any(table => string.Equals(table.Name, name, StringComparison.CurrentCultureIgnoreCase)))
                 throw new InvalidOperationException($"Unable to create table. A table already exists with the name '{name}'");
@@ -81,7 +90,16 @@ namespace PlayerIO
         /// </summary>
         /// <param name="tables"> A list of tables to export. </param>
         /// <param name="emailAddress"> The email address to send the exported JSON files to. </param>
-        public async Task Export(IEnumerable<Table> tables, string emailAddress)
+        [Obsolete("Please use " + nameof(ExportAsync) + ".")]
+        public void Export(IEnumerable<Table> tables, string emailAddress)
+            => ExportAsync(tables, emailAddress).GetAwaiter().GetResult();
+
+        /// <summary>
+        /// Export tables to the specified email address.
+        /// </summary>
+        /// <param name="tables"> A list of tables to export. </param>
+        /// <param name="emailAddress"> The email address to send the exported JSON files to. </param>
+        public async Task ExportAsync(IEnumerable<Table> tables, string emailAddress)
         {
             if (tables?.Any() != true)
                 throw new ArgumentException("You must specify at least one table to export.");

@@ -82,7 +82,7 @@ namespace PlayerIO
         /// Delete the specified connection.
         /// </summary>
         /// <param name="connectionId"> The name of the connection to delete. </param>
-        public async Task<bool> DeleteConnection(Connection connection)
+        public async Task<bool> DeleteConnectionAsync(Connection connection)
         {
             if (string.IsNullOrEmpty(connection.Name))
                 throw new ArgumentException("Unable to delete connection. Parameter 'connectionId' cannot be null or empty.");
@@ -99,7 +99,7 @@ namespace PlayerIO
         /// Create a note in the Changelog section.
         /// </summary>
         /// <param name="content"> The text in the note. </param>
-        public async Task<bool> CreateNote(string content)
+        public async Task<bool> CreateNoteAsync(string content)
         {
             if (string.IsNullOrEmpty(content))
                 throw new ArgumentException("Unable to create note. Parameter 'content' cannot be null or empty.");
@@ -119,9 +119,22 @@ namespace PlayerIO
         /// <param name="description"> The description of the connection. </param>
         /// <param name="authenticationMethod"> The method the connection will use for authentication. </param>
         /// <param name="gameDB"> The database the connection has access to. By default it is set to 'Default'. If set to null, 'Default' will be used. </param>
-        /// <param name="table_privileges"> The BigDB privileges to give this connection </param>
+        /// <param name="tablePrivileges"> The BigDB privileges to give this connection </param>
         /// <param name="sharedSecret"> If the authentication method is Basic, the sharedSecret specified here will be used. </param>
-        public async Task CreateConnection(string connectionId, string description, AuthenticationMethod authenticationMethod, string gameDB, List<(Table table, bool can_load_by_keys, bool can_create, bool can_load_by_indexes, bool can_delete, bool creator_has_full_rights, bool can_save)> table_privileges, string sharedSecret = null, CancellationToken cancellationToken = default)
+        [Obsolete("Please use " + nameof(CreateConnectionAsync) + ".")]
+        public void CreateConnection(string connectionId, string description, AuthenticationMethod authenticationMethod, string gameDB, List<(Table table, bool can_load_by_keys, bool can_create, bool can_load_by_indexes, bool can_delete, bool creator_has_full_rights, bool can_save)> tablePrivileges, string sharedSecret = null, CancellationToken cancellationToken = default)
+            => CreateConnectionAsync(connectionId, description, authenticationMethod, gameDB, tablePrivileges, sharedSecret, cancellationToken).GetAwaiter().GetResult();
+
+        /// <summary>
+        /// Creates a connection in the 'Settings' panel.
+        /// </summary>
+        /// <param name="connectionId"> The name of the connnection. </param>
+        /// <param name="description"> The description of the connection. </param>
+        /// <param name="authenticationMethod"> The method the connection will use for authentication. </param>
+        /// <param name="gameDB"> The database the connection has access to. By default it is set to 'Default'. If set to null, 'Default' will be used. </param>
+        /// <param name="tablePrivileges"> The BigDB privileges to give this connection </param>
+        /// <param name="sharedSecret"> If the authentication method is Basic, the sharedSecret specified here will be used. </param>
+        public async Task CreateConnectionAsync(string connectionId, string description, AuthenticationMethod authenticationMethod, string gameDB, List<(Table table, bool can_load_by_keys, bool can_create, bool can_load_by_indexes, bool can_delete, bool creator_has_full_rights, bool can_save)> tablePrivileges, string sharedSecret = null, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrEmpty(connectionId))
                 throw new ArgumentException("Unable to create connection - connectionId cannot be null or empty.");
@@ -153,10 +166,10 @@ namespace PlayerIO
                 var connection_name = label.Text();
 
                 // If the table wasn't specified in the method parameters, skip.
-                if (!table_privileges.Any(t => t.table.Name == connection_name))
+                if (!tablePrivileges.Any(t => t.table.Name == connection_name))
                     continue;
 
-                var table_privilege = table_privileges.Find(t => t.table.Name == connection_name);
+                var table_privilege = tablePrivileges.Find(t => t.table.Name == connection_name);
 
                 var inputs = label.NextElementSibling.QuerySelectorAll("input");
                 var id = inputs.First().Id.Split('-')[0];
