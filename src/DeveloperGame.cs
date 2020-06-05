@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -79,7 +80,7 @@ namespace AutoPlayerIO
                 Confirm = "delete connection"
             }).ConfigureAwait(false);
 
-            return response.StatusCode == System.Net.HttpStatusCode.OK;
+            return response.StatusCode == HttpStatusCode.OK;
         }
 
         /// <summary>
@@ -96,7 +97,7 @@ namespace AutoPlayerIO
                 Note = content
             }).ConfigureAwait(false);
 
-            return response.StatusCode == System.Net.HttpStatusCode.OK;
+            return response.StatusCode == HttpStatusCode.OK;
         }
 
         /// <summary>
