@@ -1,5 +1,4 @@
 ﻿using AngleSharp;
-
 using Flurl.Http;
 
 using System.Linq;
