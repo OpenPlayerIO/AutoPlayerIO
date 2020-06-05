@@ -123,32 +123,24 @@ namespace PlayerIO
         /// <param name="sharedSecret"> If the authentication method is Basic, the sharedSecret specified here will be used. </param>
         [Obsolete("Please use " + nameof(CreateConnectionAsync) + ".")]
         public void CreateConnection(string connectionId, string description, AuthenticationMethod authenticationMethod, string gameDB, List<(Table table, bool can_load_by_keys, bool can_create, bool can_load_by_indexes, bool can_delete, bool creator_has_full_rights, bool can_save)> tablePrivileges, string sharedSecret = null, CancellationToken cancellationToken = default)
-            => CreateConnectionAsync(connectionId, description, authenticationMethod, gameDB, tablePrivileges, sharedSecret, cancellationToken).GetAwaiter().GetResult();
+            => CreateConnectionAsync(new Connection(connectionId, string.Empty), description, authenticationMethod, gameDB, tablePrivileges, sharedSecret, cancellationToken).GetAwaiter().GetResult();
 
         /// <summary>
         /// Creates a connection in the 'Settings' panel.
         /// </summary>
-        /// <param name="connectionId"> The name of the connnection. </param>
+        /// <param name="connection"> The connnection to use.</param>
         /// <param name="description"> The description of the connection. </param>
         /// <param name="authenticationMethod"> The method the connection will use for authentication. </param>
         /// <param name="gameDB"> The database the connection has access to. By default it is set to 'Default'. If set to null, 'Default' will be used. </param>
         /// <param name="tablePrivileges"> The BigDB privileges to give this connection </param>
         /// <param name="sharedSecret"> If the authentication method is Basic, the sharedSecret specified here will be used. </param>
-        public async Task CreateConnectionAsync(string connectionId, string description, AuthenticationMethod authenticationMethod, string gameDB, List<(Table table, bool can_load_by_keys, bool can_create, bool can_load_by_indexes, bool can_delete, bool creator_has_full_rights, bool can_save)> tablePrivileges, string sharedSecret = null, CancellationToken cancellationToken = default)
+        public async Task CreateConnectionAsync(Connection connection, string description, AuthenticationMethod authenticationMethod, string gameDB, List<(Table table, bool can_load_by_keys, bool can_create, bool can_load_by_indexes, bool can_delete, bool creator_has_full_rights, bool can_save)> tablePrivileges, string sharedSecret = null, CancellationToken cancellationToken = default)
         {
-            if (string.IsNullOrEmpty(connectionId))
+            if (string.IsNullOrEmpty(connection.Name))
                 throw new ArgumentException("Unable to create connection - connectionId cannot be null or empty.");
 
-            if (connectionId.Any(char.IsUpper) || connectionId.Any(char.IsDigit))
-                throw new ArgumentException("Unable to create connection - connectionId must be lowercase and only consist of alphabetical characters.");
-
-            // TODO: cache Connections?
-            var connections = await LoadConnectionsAsync(cancellationToken).ConfigureAwait(false);
-            if (connections.Any(t => t.Name == connectionId))
-                throw new Exception($"Unable to create connection '{connectionId}' - a connection already exists with that name.");
-
             if (authenticationMethod == AuthenticationMethod.BasicRequiresAuthentication && string.IsNullOrEmpty(sharedSecret))
-                throw new Exception($"Unabel to create connection '{connectionId}' - when using BasicRequiresAuthentication as your authentication method, you must provide a non-empty sharedSecret.");
+                throw new Exception($"Unabel to create connection '{connection.Name}' - when using BasicRequiresAuthentication as your authentication method, you must provide a non-empty sharedSecret.");
 
             if (string.IsNullOrEmpty(gameDB))
                 gameDB = "Default";
@@ -185,7 +177,7 @@ namespace PlayerIO
 
             dynamic arguments = new ExpandoObject();
 
-            arguments.Identifier = connectionId;
+            arguments.Identifier = connection.Name;
             arguments.Description = description;
             arguments.GameDB = gameDB;
             arguments.GameDBName = "";
