@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using AngleSharp;
 using Flurl.Http;
@@ -7,12 +8,16 @@ namespace PlayerIO
 {
     public static class PlayerIO
     {
-        public static async Task<DeveloperAccount> Login(string username, string password)
+        internal const string PlayerIOURL = "https://playerio.com";
+
+        public static async Task<DeveloperAccount> LoginAsync(string username, string password, CancellationToken cancellationToken = default)
         {
-            var client = new FlurlClient("https://playerio.com").EnableCookies();
+            // DON'T DISPOSE: This FlurlClient is used throughout the lifetime of the DeveloperAccount
+            var client = new FlurlClient(PlayerIOURL).EnableCookies();
+
             var context = BrowsingContext.New(Configuration.Default);
-            var login_page = await client.Request("/login").GetStreamAsync();
-            var document = await context.OpenAsync(req => req.Content(login_page));
+            var loginPage = await client.Request("/login").GetStreamAsync(cancellationToken).ConfigureAwait(false);
+            var document = await context.OpenAsync(req => req.Content(loginPage), cancellationToken).ConfigureAwait(false);
 
             var form = document.QuerySelectorAll("form");
             var csrf = form.First().QuerySelector("input").GetAttribute("value");
@@ -23,9 +28,9 @@ namespace PlayerIO
                 Username = username,
                 Password = password,
                 RememberME = "on"
-            });
+            }, cancellationToken).ConfigureAwait(false);
 
-            return new DeveloperAccount(client.Cookies.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Value));
+            return await DeveloperAccount.LoadDeveloperAccountAsync(client, cancellationToken).ConfigureAwait(false);
         }
     }
 }

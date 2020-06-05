@@ -18,7 +18,7 @@ namespace PlayerIO
             this.Tables = new List<Table>();
 
             var bigdb_details = BrowsingContext.New(Configuration.Default)
-                .OpenAsync(req => req.Content(this.Game.Account.Client.Request($"/my/bigdb/tables/{this.Game.NavigationId}/{this.Game.XSRFToken}").GetStreamAsync().Result)).Result;
+                .OpenAsync(req => req.Content(this.Game._client.Request($"/my/bigdb/tables/{this.Game.NavigationId}/{this.Game.XSRFToken}").GetStreamAsync().Result)).Result;
 
             var rows = bigdb_details.QuerySelector(".innermainrail").QuerySelector(".box").QuerySelector("tbody").QuerySelectorAll("tr.colrow");
             var contents = rows.Select(row => new
@@ -49,7 +49,7 @@ namespace PlayerIO
             if (this.Tables.Any(table => table.Name.ToLower() == name.ToLower()))
                 throw new InvalidOperationException($"Unable to create table. A table already exists with the name '{name}'");
 
-            this.Game.Account.Client.Request($"/my/bigdb/createtable/{this.Game.Name.ToLower()}/{this.Game.XSRFToken}").PostUrlEncodedAsync(new
+            this.Game._client.Request($"/my/bigdb/createtable/{this.Game.Name.ToLower()}/{this.Game.XSRFToken}").PostUrlEncodedAsync(new
             {
                 Name = name,
                 Description = description ?? ""
@@ -75,7 +75,7 @@ namespace PlayerIO
             foreach (var table in tables)
                 ((IDictionary<string, object>)arguments).Add(table.Name, "on");
 
-            this.Game.Account.Client.Request($"/my/bigdb/exporttables/{this.Game.Name.ToLower()}/{this.Game.XSRFToken}").PostUrlEncodedAsync((object)arguments);
+            this.Game._client.Request($"/my/bigdb/exporttables/{this.Game.Name.ToLower()}/{this.Game.XSRFToken}").PostUrlEncodedAsync((object)arguments);
         }
 
         internal DeveloperGame Game { get; set; }

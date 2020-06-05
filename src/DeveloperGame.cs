@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using AngleSharp;
 using AngleSharp.Dom;
@@ -12,6 +13,32 @@ namespace PlayerIO
 {
     public partial class DeveloperGame
     {
+        internal static async Task<DeveloperGame> LoadGameAsync(
+            FlurlClient client,
+            string path,
+            CancellationToken cancellationToken = default
+        )
+        {
+            var gameDetailsRequest = client.Request(path);
+            var gameDetailsResponse = await gameDetailsRequest.ToAngleSharpResponse(null, cancellationToken).ConfigureAwait(false);
+
+            var browsingContext = BrowsingContext.New(Configuration.Default);
+            var gameDetails = await browsingContext.OpenAsync(gameDetailsResponse, cancellationToken).ConfigureAwait(false);
+
+            var name = gameDetails.QuerySelector(".headerprefix").Children.First().Text();
+
+            var gameId = gameDetails.QuerySelectorAll(".gamecreatedinfo").Any()
+				? gameDetails.QuerySelector(".yourgameid").GetElementsByTagName("td").First().Text() // when a game is first created
+                : gameDetails.GetElementsByTagName("h3").First(t => t.TextContent == "Game ID:").ParentElement.NextElementSibling.TextContent; // when a game has already been created
+
+            var navigationMenu = gameDetails.QuerySelector(".leftrail").QuerySelector("nav").QuerySelector("ul").GetElementsByTagName("li").Children("a");
+
+            var navigationId = (navigationMenu.First() as IHtmlAnchorElement).PathName.Split('/')[4];
+            var xsrfToken = (navigationMenu.First() as IHtmlAnchorElement).PathName.Split('/').Last();
+
+            return new DeveloperGame(client, xsrfToken, name, navigationId, gameId);
+        }
+
         internal string XSRFToken { get; }
 
         /// <summary>
@@ -39,23 +66,17 @@ namespace PlayerIO
         /// </summary>
         public List<Connection> Connections => this.GetConnections();
 
-        internal DeveloperGame(DeveloperAccount parent, string path)
+        // internal is used to workaround the other parts of this library requiring FlurlClient
+        internal readonly FlurlClient _client;
+
+        private DeveloperGame(FlurlClient client, string xsrfToken, string name, string navigationId, string gameId)
         {
-            this.Account = parent;
+            _client = client;
 
-            var game_details = BrowsingContext.New(Configuration.Default)
-                .OpenAsync(req => req.Content(this.Account.Client.Request(path).GetStreamAsync().Result)).Result;
-
-            this.Name = game_details.QuerySelector(".headerprefix").Children.First().Text();
-
-            this.GameId = game_details.QuerySelectorAll(".gamecreatedinfo").Count() > 0
-                ? game_details.QuerySelector(".yourgameid").GetElementsByTagName("td").First().Text() // when a game is first created
-                : game_details.GetElementsByTagName("h3").Where(t => t.TextContent == "Game ID:").First().ParentElement.NextElementSibling.TextContent; // when a game has already been created
-
-            var navigation_menu = game_details.QuerySelector(".leftrail").QuerySelector("nav").QuerySelector("ul").GetElementsByTagName("li").Children("a");
-
-            this.NavigationId = (navigation_menu.First() as IHtmlAnchorElement).PathName.Split('/')[4];
-            this.XSRFToken = (navigation_menu.First() as IHtmlAnchorElement).PathName.Split('/').Last();
+            XSRFToken = xsrfToken;
+            Name = name;
+            NavigationId = navigationId;
+            GameId = gameId;
         }
 
         /// <summary>
@@ -67,7 +88,7 @@ namespace PlayerIO
             if (string.IsNullOrEmpty(connection.Name))
                 throw new ArgumentException("Unable to delete connection. Parameter 'connectionId' cannot be null or empty.");
 
-            var response = await this.Account.Client.Request($"/my/connections/delete/{this.NavigationId}/{connection.Name}/{this.XSRFToken}").PostUrlEncodedAsync(new
+            var response = await _client.Request($"/my/connections/delete/{this.NavigationId}/{connection.Name}/{this.XSRFToken}").PostUrlEncodedAsync(new
             {
                 Confirm = "delete connection"
             });
@@ -84,7 +105,7 @@ namespace PlayerIO
             if (string.IsNullOrEmpty(content))
                 throw new ArgumentException("Unable to create note. Parameter 'content' cannot be null or empty.");
 
-            var response = await this.Account.Client.Request($"/my/changelog/addnote/{this.NavigationId}/{this.XSRFToken}").PostUrlEncodedAsync(new
+            var response = await _client.Request($"/my/changelog/addnote/{this.NavigationId}/{this.XSRFToken}").PostUrlEncodedAsync(new
             {
                 Note = content
             });
@@ -119,7 +140,7 @@ namespace PlayerIO
                 gameDB = "Default";
 
             var creation_details = BrowsingContext.New(Configuration.Default)
-                .OpenAsync(req => req.Content(this.Account.Client.Request($"/my/connections/create/{this.NavigationId}/{this.XSRFToken}").GetStreamAsync().Result)).Result;
+                .OpenAsync(req => req.Content(_client.Request($"/my/connections/create/{this.NavigationId}/{this.XSRFToken}").GetStreamAsync().Result)).Result;
             var access_rights = creation_details.QuerySelector("#bigdbaccessrights");
             var table_names = access_rights.QuerySelectorAll("b");
             var connection_privileges = new List<(string id, string name, bool can_load_by_keys, bool can_create, bool can_load_by_indexes, bool can_delete, bool creator_has_full_rights, bool can_save)>();
@@ -187,8 +208,8 @@ namespace PlayerIO
                     ((IDictionary<string, object>)arguments).Add(privilege.id + "-cansave", "on");
             }
 
-            var create_connection_response = this.Account.Client.Request($"/my/connections/create/{this.NavigationId}/{this.XSRFToken}").PostUrlEncodedAsync((object)arguments).Result;
-            var edit_connection_response = this.Account.Client.Request($"/my/connections/edit/{this.NavigationId}/{arguments.Identifier}/{this.XSRFToken}").PostUrlEncodedAsync((object)arguments).Result;
+            var create_connection_response = _client.Request($"/my/connections/create/{this.NavigationId}/{this.XSRFToken}").PostUrlEncodedAsync((object)arguments).Result;
+            var edit_connection_response = _client.Request($"/my/connections/edit/{this.NavigationId}/{arguments.Identifier}/{this.XSRFToken}").PostUrlEncodedAsync((object)arguments).Result;
         }
 
         private BigDB GetBigDB() => new BigDB(this);
@@ -198,7 +219,7 @@ namespace PlayerIO
             var connections = new List<Connection>();
 
             var settings_details = BrowsingContext.New(Configuration.Default)
-               .OpenAsync(req => req.Content(this.Account.Client.Request($"/my/games/settings/{this.NavigationId}/{this.XSRFToken}").GetStreamAsync().Result)).Result;
+               .OpenAsync(req => req.Content(_client.Request($"/my/games/settings/{this.NavigationId}/{this.XSRFToken}").GetStreamAsync().Result)).Result;
 
             var section = settings_details.QuerySelectorAll("section").Where(x => x.GetElementsByTagName("h3").Any(t => t.TextContent == "Connections")).First();
             var rows = section.QuerySelectorAll("tr.colrow");
