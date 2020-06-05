@@ -1,8 +1,10 @@
-﻿using System.Linq;
+﻿using AngleSharp;
+
+using Flurl.Http;
+
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using AngleSharp;
-using Flurl.Http;
 
 namespace PlayerIO
 {
@@ -30,7 +32,7 @@ namespace PlayerIO
                 RememberME = "on"
             }, cancellationToken).ConfigureAwait(false);
 
-            return await DeveloperAccount.LoadDeveloperAccountAsync(client, cancellationToken).ConfigureAwait(false);
+            return await DeveloperAccount.LoadAsync(client, cancellationToken).ConfigureAwait(false);
         }
     }
 }
