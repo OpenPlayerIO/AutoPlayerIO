@@ -230,11 +230,9 @@ namespace AutoPlayerIO
                 Description = row.QuerySelectorAll("div").First()?.TextContent,
             });
 
-            var connectionTasks = new List<Connection>();
-
             foreach (var table in contents)
             {
-                connectionTasks.Add(new Connection(table.Name, table.Description));
+                connections.Add(new Connection(table.Name, table.Description));
             }
 
             return connections;
