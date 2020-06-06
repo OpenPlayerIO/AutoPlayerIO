@@ -111,7 +111,7 @@ namespace AutoPlayerIO
         /// <param name="tablePrivileges"> The BigDB privileges to give this connection </param>
         /// <param name="sharedSecret"> If the authentication method is Basic, the sharedSecret specified here will be used. </param>
         public async Task CreateConnectionAsync(
-            Connection connection,
+            string connectionId,
             string description,
             AuthenticationMethod authenticationMethod,
             string gameDB,
@@ -119,11 +119,14 @@ namespace AutoPlayerIO
             string sharedSecret = null,
             CancellationToken cancellationToken = default)
         {
-            if (string.IsNullOrEmpty(connection.Name))
+            if (string.IsNullOrEmpty(connectionId))
                 throw new ArgumentException("Unable to create connection - connectionId cannot be null or empty.");
 
+            if (connectionId.Any(char.IsUpper) || connectionId.Any(char.IsDigit))
+                throw new ArgumentException("Unable to create connection - connectionId must be all lowercase and alphabetic.");
+
             if (authenticationMethod == AuthenticationMethod.BasicRequiresAuthentication && string.IsNullOrEmpty(sharedSecret))
-                throw new Exception($"Unable to create connection '{connection.Name}' - when using BasicRequiresAuthentication as your authentication method, you must provide a non-empty sharedSecret.");
+                throw new Exception($"Unable to create connection '{connectionId}' - when using BasicRequiresAuthentication as your authentication method, you must provide a non-empty sharedSecret.");
 
             if (string.IsNullOrEmpty(gameDB))
                 gameDB = "Default";
@@ -160,7 +163,7 @@ namespace AutoPlayerIO
 
             dynamic arguments = new ExpandoObject();
 
-            arguments.Identifier = connection.Name;
+            arguments.Identifier = connectionId;
             arguments.Description = description;
             arguments.GameDB = gameDB;
             arguments.GameDBName = "";
