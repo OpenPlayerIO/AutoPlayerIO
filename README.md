@@ -1,5 +1,5 @@
 # AutoPlayerIO
-[![Nuget](https://img.shields.io/nuget/v/Venture.svg)](https://www.nuget.org/packages/Venture/)
+[![Nuget](https://img.shields.io/nuget/v/AutoPlayerIO .svg)](https://www.nuget.org/packages/AutoPlayerIO /)
 
 A library designed to parse the Player.IO website and automate the website dashboard. 
 
