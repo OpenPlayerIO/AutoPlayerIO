@@ -1,5 +1,7 @@
 # AutoPlayerIO
-A library to parse the Player.IO website and allow developers to automate web actions.
+[![Nuget](https://img.shields.io/nuget/v/Venture.svg)](https://www.nuget.org/packages/Venture/)
+
+A library designed to parse the Player.IO website and automate the website dashboard. 
 
 Please note that this library is not officially supported by Player.IO and can become out-of-date at any point.
 
