@@ -3,6 +3,17 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>Atilla Lonny</Authors>
+    <Company />
+    <Product />
+    <Description>A library designed to parse the Player.IO website and automate the website dashboard.</Description>
+    <Copyright>MIT</Copyright>
+    <PackageLicenseExpression>https://licenses.nuget.org/MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/OpenPlayerIO/AutoPlayerIO</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/OpenPlayerIO/AutoPlayerIO</RepositoryUrl>
+    <RepositoryType>Git</RepositoryType>
+    <PackageTags>AutoPlayerIO, PlayerIO, Player.IO</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
