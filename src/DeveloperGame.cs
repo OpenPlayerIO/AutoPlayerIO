@@ -206,6 +206,32 @@ namespace AutoPlayerIO
             var edit_connection_response = await _client.Request($"/my/connections/edit/{this.NavigationId}/{arguments.Identifier}/{this.XSRFToken}").PostUrlEncodedAsync((object)arguments).ConfigureAwait(false);
         }
 
+        public async Task ChangeSimpleUserEmail(string userId, string newEmail)
+        {
+            var check_user_response = await _client.Request($"/my/quickconnect/manageuseremail/{this.NavigationId}/simple/{this.XSRFToken}/{userId}").GetAsync().ConfigureAwait(false);
+
+            if (check_user_response.StatusCode != HttpStatusCode.OK)
+                throw new Exception("Unable to change simple user email. The user specified could not be found.");
+
+            var change_email_response = await _client.Request($"/my/quickconnect/manageuseremail/{this.NavigationId}/simple/{this.XSRFToken}/{userId}").PostUrlEncodedAsync(new { Email = newEmail }).ConfigureAwait(false);
+
+            if (change_email_response.StatusCode != HttpStatusCode.OK)
+                throw new Exception("Unable to change simple user email. An internal unexpected error occurred.");
+        }
+
+        public async Task ChangeSimpleUserPassword(string userId, string newPassword)
+        {
+            var check_user_response = await _client.Request($"/my/quickconnect/manageuseremail/{this.NavigationId}/simple/{this.XSRFToken}/{userId}").GetAsync().ConfigureAwait(false);
+
+            if (check_user_response.StatusCode != HttpStatusCode.OK)
+                throw new Exception("Unable to change simple user password. The user specified could not be found.");
+
+            var change_password_response = await _client.Request($"/my/quickconnect/manageuserpassword/{this.NavigationId}/simple/{this.XSRFToken}/{userId}").PostUrlEncodedAsync(new { Password1 = newPassword, Password2 = newPassword }).ConfigureAwait(false);
+
+            if (change_password_response.StatusCode != HttpStatusCode.OK)
+                throw new Exception("Unable to change simple user password. An internal unexpected error occurred.");
+        }
+
         public Task<BigDB> LoadBigDBAsync(CancellationToken cancellationToken = default)
             => BigDB.LoadAsync(_client, this.XSRFToken, this, cancellationToken);
 
