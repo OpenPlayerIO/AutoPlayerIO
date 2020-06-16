@@ -206,6 +206,11 @@ namespace AutoPlayerIO
             var edit_connection_response = await _client.Request($"/my/connections/edit/{this.NavigationId}/{arguments.Identifier}/{this.XSRFToken}").PostUrlEncodedAsync((object)arguments).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Change the email address of a simple user.
+        /// </summary>
+        /// <param name="userId"> The userId of the user. </param>
+        /// <param name="newEmail"> The new email to be set. </param>
         public async Task ChangeSimpleUserEmail(string userId, string newEmail)
         {
             var check_user_response = await _client.Request($"/my/quickconnect/manageuseremail/{this.NavigationId}/simple/{this.XSRFToken}/{userId}").GetAsync().ConfigureAwait(false);
@@ -219,6 +224,11 @@ namespace AutoPlayerIO
                 throw new Exception("Unable to change simple user email. An internal unexpected error occurred.");
         }
 
+        /// <summary>
+        /// Change the password of a simple user.
+        /// </summary>
+        /// <param name="userId"> The userId of the user. </param>
+        /// <param name="newPassword"> The new password to be set. </param>
         public async Task ChangeSimpleUserPassword(string userId, string newPassword)
         {
             var check_user_response = await _client.Request($"/my/quickconnect/manageuseremail/{this.NavigationId}/simple/{this.XSRFToken}/{userId}").GetAsync().ConfigureAwait(false);
