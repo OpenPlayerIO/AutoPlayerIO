@@ -206,6 +206,43 @@ namespace AutoPlayerIO
             var edit_connection_response = await _client.Request($"/my/connections/edit/{this.NavigationId}/{arguments.Identifier}/{this.XSRFToken}").PostUrlEncodedAsync((object)arguments).ConfigureAwait(false);
         }
 
+
+        /// <summary>
+        /// Return the email address of a simple user.
+        /// </summary>
+        public async Task<string> GetSimpleEmailAsync(string connectUserId, CancellationToken cancellationToken = default)
+        {
+            if (!connectUserId.StartsWith("simple"))
+                throw new Exception("This method only applies to Simple users.");
+
+            var quickConnectDetails = await _client.Request($"/my/quickconnect/manageuseremail/{this.NavigationId}/simple/{this.XSRFToken}/{connectUserId.Substring(6)}")
+                .LoadDocumentAsync(cancellationToken)
+                .ConfigureAwait(false);
+
+            if (quickConnectDetails.StatusCode != System.Net.HttpStatusCode.OK)
+                throw new Exception("Unable to get simple user's email. The user specified could not be found.");
+
+            return quickConnectDetails.GetElementById("Email").GetAttribute("value");
+        }
+
+        /// <summary>
+        /// Return the Kongregate username of a Kongregate user.
+        /// </summary>
+        public async Task<string> GetKongNameAsync(string connectUserId, CancellationToken cancellationToken = default)
+        {
+            if (!connectUserId.StartsWith("kong"))
+                throw new Exception("This method only applies to Kongregate users.");
+
+            var quickConnectDetails = await _client.Request($"/my/quickconnect/manageuser/{this.NavigationId}/kongregate/{this.XSRFToken}/{connectUserId.Substring(4)}")
+                .LoadDocumentAsync(cancellationToken)
+                .ConfigureAwait(false);
+
+            if (quickConnectDetails.StatusCode != System.Net.HttpStatusCode.OK)
+                throw new Exception("Unable to get kongregate user's name. The user specified could not be found.");
+
+            return quickConnectDetails.QuerySelector("p").TextContent.Replace("Name: ", string.Empty).Trim();
+        }
+
         /// <summary>
         /// Change the email address of a simple user.
         /// </summary>
