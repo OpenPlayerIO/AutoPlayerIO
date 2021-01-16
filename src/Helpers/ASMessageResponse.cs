@@ -13,8 +13,6 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
-#nullable enable
-
 namespace AutoPlayerIO
 {
     /// <summary>
@@ -53,7 +51,7 @@ namespace AutoPlayerIO
     {
         public static async Task<ASMessageResponse> ToAngleSharpResponse(
             this IFlurlRequest flurlRequest,
-            Func<IFlurlRequest, Task<HttpResponseMessage>>? executionPredicate,
+            Func<IFlurlRequest, Task<HttpResponseMessage>> executionPredicate,
             CancellationToken cancellationToken = default
         )
         {
