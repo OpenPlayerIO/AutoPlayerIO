@@ -14,7 +14,7 @@ namespace AutoPlayerIO
         public static async Task<DeveloperAccount> LoginAsync(string username, string password, CancellationToken cancellationToken = default)
         {
             // DON'T DISPOSE: This FlurlClient is used throughout the lifetime of the DeveloperAccount
-            var client = new FlurlClient(API_ENDPOINT).EnableCookies();
+            var client = new FlurlClient(API_ENDPOINT);
 
             var context = BrowsingContext.New(Configuration.Default);
             var loginPage = await client.Request("/login").GetStreamAsync(cancellationToken).ConfigureAwait(false);
