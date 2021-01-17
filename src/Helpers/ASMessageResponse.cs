@@ -60,15 +60,28 @@ namespace AutoPlayerIO
             var uri = flurlRequest.Url.ToUri();
             var url = Url.Convert(uri);
 
-            var httpResponseMessageTask = executionPredicate == null
-                ? flurlRequest.GetAsync(cancellationToken)
-                : executionPredicate(flurlRequest);
+            
+            if (executionPredicate == null)
+            {
+                Task<IFlurlResponse> flurlResponseMessageTask = flurlRequest.GetAsync(cancellationToken);
 
-            var httpResponseMessage = await httpResponseMessageTask.ConfigureAwait(false);
+                var flurlResponseMessage = await flurlResponseMessageTask.ConfigureAwait(false);
 
-            var content = await httpResponseMessage.Content.ReadAsStreamAsync().ConfigureAwait(false);
+                var content = await flurlResponseMessage.ResponseMessage.Content.ReadAsStreamAsync().ConfigureAwait(false);
 
-            return new ASMessageResponse(url, httpResponseMessage, content);
+                return new ASMessageResponse(url, flurlResponseMessage.ResponseMessage, content);
+            }
+            else
+            {
+
+                Task<HttpResponseMessage> httpResponseMessageTask = executionPredicate(flurlRequest);
+
+                var httpResponseMessage = await httpResponseMessageTask.ConfigureAwait(false);
+
+                var content = await httpResponseMessage.Content.ReadAsStreamAsync().ConfigureAwait(false);
+
+                return new ASMessageResponse(url, httpResponseMessage, content);
+            }
         }
     }
 }
