@@ -80,7 +80,7 @@ namespace AutoPlayerIO
                 Confirm = "delete connection"
             }).ConfigureAwait(false);
 
-            return response.StatusCode == HttpStatusCode.OK;
+            return response.StatusCode == (int)HttpStatusCode.OK;
         }
 
         /// <summary>
@@ -97,7 +97,7 @@ namespace AutoPlayerIO
                 Note = content
             }).ConfigureAwait(false);
 
-            return response.StatusCode == HttpStatusCode.OK;
+            return response.StatusCode == (int)HttpStatusCode.OK;
         }
 
 
@@ -252,12 +252,12 @@ namespace AutoPlayerIO
         {
             var check_user_response = await _client.Request($"/my/quickconnect/manageuseremail/{this.NavigationId}/simple/{this.XSRFToken}/{userId}").GetAsync().ConfigureAwait(false);
 
-            if (check_user_response.StatusCode != HttpStatusCode.OK)
+            if (check_user_response.StatusCode != (int)HttpStatusCode.OK)
                 throw new Exception("Unable to change simple user email. The user specified could not be found.");
 
             var change_email_response = await _client.Request($"/my/quickconnect/manageuseremail/{this.NavigationId}/simple/{this.XSRFToken}/{userId}").PostUrlEncodedAsync(new { Email = newEmail }).ConfigureAwait(false);
 
-            if (change_email_response.StatusCode != HttpStatusCode.OK)
+            if (change_email_response.StatusCode != (int)HttpStatusCode.OK)
                 throw new Exception("Unable to change simple user email. An internal unexpected error occurred.");
         }
 
@@ -270,12 +270,12 @@ namespace AutoPlayerIO
         {
             var check_user_response = await _client.Request($"/my/quickconnect/manageuseremail/{this.NavigationId}/simple/{this.XSRFToken}/{userId}").GetAsync().ConfigureAwait(false);
 
-            if (check_user_response.StatusCode != HttpStatusCode.OK)
+            if (check_user_response.StatusCode != (int)HttpStatusCode.OK)
                 throw new Exception("Unable to change simple user password. The user specified could not be found.");
 
             var change_password_response = await _client.Request($"/my/quickconnect/manageuserpassword/{this.NavigationId}/simple/{this.XSRFToken}/{userId}").PostUrlEncodedAsync(new { Password1 = newPassword, Password2 = newPassword }).ConfigureAwait(false);
 
-            if (change_password_response.StatusCode != HttpStatusCode.OK)
+            if (change_password_response.StatusCode != (int)HttpStatusCode.OK)
                 throw new Exception("Unable to change simple user password. An internal unexpected error occurred.");
         }
 
