@@ -303,12 +303,85 @@ namespace AutoPlayerIO
                 Description = row.QuerySelectorAll("div").First()?.TextContent,
             });
 
-            foreach (var table in contents)
+            foreach (var row in contents)
             {
-                connections.Add(new Connection(table.Name, table.Description));
+                var connectionDetails = await _client.Request($"/my/connections/edit/{this.NavigationId}/{row.Name}/{this.XSRFToken}")
+                    .LoadDocumentAsync(cancellationToken)
+                    .ConfigureAwait(false);
+                
+                var tableAccessRights = new List<TableAccessRight>();
+                var connectionProperties = new Dictionary<string, object>();
+                foreach (var input in connectionDetails.QuerySelectorAll("input"))
+                {
+                    if (input.Id.StartsWith("access") || input.Id.StartsWith("rr"))
+                        continue;
+
+                    if (input.GetAttribute("type") == "checkbox")
+                        connectionProperties.Add(input.Id, input.IsChecked());
+                    else connectionProperties.Add(input.Id, input.GetAttribute("value"));
+                }
+
+                var connectionRights = new ConnectionRights()
+                {
+                    CreateMultiplayerRoom = connectionDetails.QuerySelector("#rr1").IsChecked(),
+                    JoinMultiplayerRoom = connectionDetails.QuerySelector("#rr2").IsChecked(),
+                    ListMultiplayerRooms = connectionDetails.QuerySelector("#rr3").IsChecked(),
+                    AccessPayVault = connectionDetails.QuerySelector("#rr4").IsChecked(),
+                    CreditPayVault = connectionDetails.QuerySelector("#rr5").IsChecked(),
+                    DebitPayVault = connectionDetails.QuerySelector("#rr6").IsChecked(),
+                    CanGiveVaultItems = connectionDetails.QuerySelector("#rr7").IsChecked(),
+                    CanBuyVaultItems = connectionDetails.QuerySelector("#rr8").IsChecked(),
+                    CanConsumeVaultItems = connectionDetails.QuerySelector("#rr9").IsChecked(),
+                    CanReadPayVaultHistory = connectionDetails.QuerySelector("#rr10").IsChecked(),
+                    // rr11 does not exist
+                    // rr12 does not exist
+                    CanAwardAchievement = connectionDetails.QuerySelector("#rr13").IsChecked(),
+                    AccessAchievement = connectionDetails.QuerySelector("#rr14").IsChecked(),
+                    CanLoadAchievements = connectionDetails.QuerySelector("#rr15").IsChecked(),
+                    CanSendGameRequests = connectionDetails.QuerySelector("#rr16").IsChecked(),
+                    CanAccessGameRequests = connectionDetails.QuerySelector("#rr17").IsChecked(),
+                    CanDeleteGameRequests = connectionDetails.QuerySelector("#rr18").IsChecked(),
+                    CanSendNotifications = connectionDetails.QuerySelector("#rr19").IsChecked(),
+                    CanRegisterNotificationEndpoints = connectionDetails.QuerySelector("#rr20").IsChecked(),
+                    CanManageNotifications = connectionDetails.QuerySelector("#rr21").IsChecked(),
+                    CanPlayerInsightRefresh = connectionDetails.QuerySelector("#rr22").IsChecked(),
+                    CanPlayerInsightSetSegments = connectionDetails.QuerySelector("#rr23").IsChecked(),
+                    CanmarkwhoinvitedauserinPlayerInsight = connectionDetails.QuerySelector("#rr24").IsChecked(),
+                    CanPlayerInsightTrackEvents = connectionDetails.QuerySelector("#rr25").IsChecked(),
+                    CanPlayerInsightTrackExternalPayment = connectionDetails.QuerySelector("#rr26").IsChecked(),
+                    CanSetCustomPlayerInsightSegments = connectionDetails.QuerySelector("#rr27").IsChecked(),
+                    CanModifyOneScore = connectionDetails.QuerySelector("#rr28").IsChecked(),
+                    CanSetLeaderboardScore = connectionDetails.QuerySelector("#rr29").IsChecked(),
+                    CanLoadLeaderboardScores = connectionDetails.QuerySelector("#rr30").IsChecked(),
+                };
+
+                foreach (var accessRow in connectionDetails.QuerySelectorAll(".tableaccessrights"))
+                {
+                    var tableName = accessRow.PreviousElementSibling.TextContent;
+
+                    var canLoadByKeys = accessRow.QuerySelectorAll("input").First(t => t.Id.Split('-')[1] == "canloadbykeys").IsChecked();
+                    var canLoadByIndexes = accessRow.QuerySelectorAll("input").First(t => t.Id.Split('-')[1] == "canloadbyindexes").IsChecked();
+                    var fullCreatorRights = accessRow.QuerySelectorAll("input").First(t => t.Id.Split('-')[1] == "creatorhasfullrights").IsChecked();
+                    var canCreate = accessRow.QuerySelectorAll("input").First(t => t.Id.Split('-')[1] == "cancreate").IsChecked();
+                    var canDelete = accessRow.QuerySelectorAll("input").First(t => t.Id.Split('-')[1] == "candelete").IsChecked();
+                    var canSave = accessRow.QuerySelectorAll("input").First(t => t.Id.Split('-')[1] == "cansave").IsChecked();
+
+                    tableAccessRights.Add(new TableAccessRight()
+                    {
+                        Name = tableName,
+                        LoadByKeys = canLoadByKeys,
+                        LoadByIndexes = canLoadByIndexes,
+                        FullCreatorRights = fullCreatorRights,
+                        Create = canCreate,
+                        Delete = canDelete,
+                        Save = canSave
+                    });
+                }
+
+                connections.Add(new Connection(row.Name, row.Description, connectionProperties, connectionRights, tableAccessRights));
             }
 
-            return connections;
+             return connections;
         }
     }
 }

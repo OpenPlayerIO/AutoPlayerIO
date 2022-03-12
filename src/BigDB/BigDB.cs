@@ -44,9 +44,8 @@ namespace AutoPlayerIO
                     .LoadDocumentAsync(cancellationToken)
                     .ConfigureAwait(false);
 
-                var indexRows = tableIndexDetails.QuerySelectorAll(".bigdbindex");
-
-                foreach (var row in indexRows)
+                var bigDbIndexRows = tableIndexDetails.QuerySelectorAll(".bigdbindex");
+                foreach (var row in bigDbIndexRows)
                 {
                     var indexName = row.QuerySelector(".indexheader").QuerySelector("b").TextContent;
                     var props = row.QuerySelector(".props").QuerySelectorAll("li");
