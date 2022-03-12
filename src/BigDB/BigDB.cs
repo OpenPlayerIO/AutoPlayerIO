@@ -13,7 +13,7 @@ namespace AutoPlayerIO
 {
     public class BigDB
     {
-        public static async Task<BigDB> LoadAsync(FlurlClient client, string xsrfToken, DeveloperGame game, CancellationToken cancellationToken = default)
+        public static async Task<BigDB> LoadAsync(CookieSession client, string xsrfToken, DeveloperGame game, CancellationToken cancellationToken = default)
         {
             var tables = new List<Table>();
 
@@ -24,19 +24,59 @@ namespace AutoPlayerIO
             var rows = bigdbDetails.QuerySelector(".innermainrail").QuerySelector(".box").QuerySelector("tbody").QuerySelectorAll("tr.colrow");
             var contents = rows.Select(row => new
             {
+                Id = row.QuerySelectorAll("a.big").First()?.GetAttribute("href").Split('/').Reverse().Skip(1).Take(1).First(),
                 Name = row.QuerySelectorAll("a.big").First()?.TextContent,
                 Description = row.QuerySelectorAll("p").First()?.TextContent,
                 ExtraDetails = row.QuerySelectorAll("td").Skip(1).Take(1).First()?.Text().Replace("\n", "").Replace("\r", "").Replace("\t", "")
             });
 
-            foreach (var table in contents)
+            foreach (var content in contents)
             {
-                tables.Add(new Table()
+                var table = new Table()
                 {
-                    Name = table.Name,
-                    Description = table.Description,
-                    ExtraDetails = table.ExtraDetails
-                });
+                    Name = content.Name,
+                    Description = content.Description,
+                    ExtraDetails = content.ExtraDetails,
+                    Indexes = new List<TableIndex>()
+                };
+
+                var tableIndexDetails = await client.Request($"/my/bigdb/edittable/{game.NavigationId}/{content.Id}/{xsrfToken}")
+                    .LoadDocumentAsync(cancellationToken)
+                    .ConfigureAwait(false);
+
+                var indexRows = tableIndexDetails.QuerySelectorAll(".bigdbindex");
+
+                foreach (var row in indexRows)
+                {
+                    var indexName = row.QuerySelector(".indexheader").QuerySelector("b").TextContent;
+                    var props = row.QuerySelector(".props").QuerySelectorAll("li");
+
+                    var tableIndex = new TableIndex
+                    {
+                        Name = indexName,
+                        Properties = new List<IndexProperty>()
+                    };
+
+                    foreach (var prop in props)
+                    {
+                        var propertyName = prop.QuerySelector("span").TextContent;
+                        var propertyContent = prop.TextContent.Replace("(", "").Replace(")", "").Replace(",", "").Split(' ');
+
+                        var propertyType = (IndexPropertyType)Enum.Parse(typeof(IndexPropertyType), propertyContent[1]);
+                        var propertyOrder = (IndexPropertyOrder)Enum.Parse(typeof(IndexPropertyOrder), propertyContent[2]);
+
+                        tableIndex.Properties.Add(new IndexProperty()
+                        {
+                            Name = propertyName,
+                            Type = propertyType,
+                            Order = propertyOrder,
+                        });
+                    }
+
+                    table.Indexes.Add(tableIndex);
+                }
+
+                tables.Add(table);
             }
 
             return new BigDB(client, xsrfToken, game, tables);
@@ -45,10 +85,10 @@ namespace AutoPlayerIO
         public List<Table> Tables { get; }
         public DeveloperGame Game { get; }
 
-        private readonly FlurlClient _client;
+        private readonly CookieSession _client;
         private readonly string _xsrfToken;
 
-        private BigDB(FlurlClient client, string xsrfToken, DeveloperGame game, List<Table> tables)
+        private BigDB(CookieSession client, string xsrfToken, DeveloperGame game, List<Table> tables)
         {
             _client = client;
             _xsrfToken = xsrfToken;

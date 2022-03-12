@@ -1,5 +1,6 @@
 ﻿using AngleSharp;
 using AngleSharp.Common;
+using AngleSharp.Dom;
 using AngleSharp.Io;
 
 using Flurl.Http;

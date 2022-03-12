@@ -15,7 +15,7 @@ namespace AutoPlayerIO
     public partial class DeveloperGame
     {
         internal static async Task<DeveloperGame> LoadAsync(
-            FlurlClient client,
+            CookieSession client,
             string path,
             CancellationToken cancellationToken = default
         )
@@ -54,9 +54,9 @@ namespace AutoPlayerIO
         public string GameId { get; }
 
         // internal is used to workaround the other parts of this library requiring FlurlClient
-        internal readonly FlurlClient _client;
+        internal readonly CookieSession _client;
 
-        private DeveloperGame(FlurlClient client, string xsrfToken, string name, string navigationId, string gameId)
+        private DeveloperGame(CookieSession client, string xsrfToken, string name, string navigationId, string gameId)
         {
             _client = client;
 

@@ -12,7 +12,7 @@ namespace AutoPlayerIO
     public class DeveloperAccount
     {
         internal static async Task<DeveloperAccount> LoadAsync(
-            FlurlClient client,
+            CookieSession client,
             CancellationToken cancellationToken = default
         )
         {

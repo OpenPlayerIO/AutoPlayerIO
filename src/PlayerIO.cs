@@ -14,7 +14,7 @@ namespace AutoPlayerIO
         public static async Task<DeveloperAccount> LoginAsync(string username, string password, CancellationToken cancellationToken = default)
         {
             // DON'T DISPOSE: This FlurlClient is used throughout the lifetime of the DeveloperAccount
-            var client = new FlurlClient(API_ENDPOINT);
+            var client = new CookieSession(API_ENDPOINT);
 
             var context = BrowsingContext.New(Configuration.Default);
             var loginPage = await client.Request("/login").GetStreamAsync(cancellationToken).ConfigureAwait(false);
@@ -23,7 +23,8 @@ namespace AutoPlayerIO
             var form = document.QuerySelectorAll("form");
             var csrf = form.First().QuerySelector("input").GetAttribute("value");
 
-            var response = await client.Request("https://playerio.com/login").PostUrlEncodedAsync(new
+            var response = await client.Request("https://playerio.com/login")
+                .PostUrlEncodedAsync(new
             {
                 CSRF = csrf,
                 Username = username,

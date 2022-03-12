@@ -13,7 +13,7 @@ namespace AutoPlayerIO
         public long CoinsUsed { get; }
         public long EndBalance { get; }
 
-        public static async Task<PayVault> LoadAsync(FlurlClient client, string xsrfToken, DeveloperGame game, CancellationToken cancellationToken = default)
+        public static async Task<PayVault> LoadAsync(CookieSession client, string xsrfToken, DeveloperGame game, CancellationToken cancellationToken = default)
         {
             var payVaultAnalytics = await client.Request($"/my/payvault/start/{game.NavigationId}/{xsrfToken}")
                 .LoadDocumentAsync(cancellationToken)
@@ -27,7 +27,7 @@ namespace AutoPlayerIO
             return new PayVault(client, xsrfToken, game, start_balance, coins_added, coins_used, end_balance);
         }
 
-        private PayVault(FlurlClient client, string xsrfToken, DeveloperGame game, long start_balance, long coins_added, long coins_used, long end_balance)
+        private PayVault(CookieSession client, string xsrfToken, DeveloperGame game, long start_balance, long coins_added, long coins_used, long end_balance)
         {
             this.StartBalance = start_balance;
             this.CoinsAdded = coins_added;
