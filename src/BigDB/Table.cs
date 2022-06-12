@@ -8,6 +8,11 @@ namespace AutoPlayerIO
     public class Table
     {
         /// <summary>
+        /// The ID of the table.
+        /// </summary>
+        public int Id { get; internal set; }
+
+        /// <summary>
         /// The name of the table.
         /// </summary>
         public string Name { get; internal set; }

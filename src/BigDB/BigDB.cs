@@ -13,6 +13,28 @@ namespace AutoPlayerIO
 {
     public class BigDB
     {
+        public List<Table> Tables { get; }
+        public DeveloperGame Game { get; }
+
+        private readonly CookieSession _client;
+        private readonly string _xsrfToken;
+
+        /// <summary>
+        /// This class enables you to download the database object contents of a specified table.
+        /// </summary>
+        /// <param name="table"> The table to download objects from. </param>
+        /// <param name="gameDbId"> The ID of the BigDB database to use. The default database is 0. </param>
+        public WebExportUtility GetWebExport(Table table, uint gameDbId = 0) => new WebExportUtility(_client, _xsrfToken, this.Game, table, gameDbId);
+
+        private BigDB(CookieSession client, string xsrfToken, DeveloperGame game, List<Table> tables)
+        {
+            _client = client;
+            _xsrfToken = xsrfToken;
+
+            this.Game = game;
+            this.Tables = tables;
+        }
+
         public static async Task<BigDB> LoadAsync(CookieSession client, string xsrfToken, DeveloperGame game, CancellationToken cancellationToken = default)
         {
             var tables = new List<Table>();
@@ -34,6 +56,7 @@ namespace AutoPlayerIO
             {
                 var table = new Table()
                 {
+                    Id = int.Parse(content.Id),
                     Name = content.Name,
                     Description = content.Description,
                     ExtraDetails = content.ExtraDetails,
@@ -79,21 +102,6 @@ namespace AutoPlayerIO
             }
 
             return new BigDB(client, xsrfToken, game, tables);
-        }
-
-        public List<Table> Tables { get; }
-        public DeveloperGame Game { get; }
-
-        private readonly CookieSession _client;
-        private readonly string _xsrfToken;
-
-        private BigDB(CookieSession client, string xsrfToken, DeveloperGame game, List<Table> tables)
-        {
-            _client = client;
-            _xsrfToken = xsrfToken;
-
-            this.Game = game;
-            this.Tables = tables;
         }
 
         /// <summary>

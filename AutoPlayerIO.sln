@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30011.22
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoPlayerIO", "src\AutoPlayerIO.csproj", "{C8500B8C-E30D-4099-8C29-663F244C414D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestProject", "TestProject\TestProject.csproj", "{6C56462F-9F26-42B3-B7EA-5738CBC1A134}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{C8500B8C-E30D-4099-8C29-663F244C414D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C8500B8C-E30D-4099-8C29-663F244C414D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C8500B8C-E30D-4099-8C29-663F244C414D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6C56462F-9F26-42B3-B7EA-5738CBC1A134}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C56462F-9F26-42B3-B7EA-5738CBC1A134}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C56462F-9F26-42B3-B7EA-5738CBC1A134}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C56462F-9F26-42B3-B7EA-5738CBC1A134}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
