@@ -147,37 +147,46 @@ namespace CloneTool
 
             var bigdb_archive_path = Path.Combine(Environment.CurrentDirectory, $"bigdb-{e_game.GameId}.zip");
 
-            using (var fileStream = new FileStream(bigdb_archive_path, FileMode.OpenOrCreate))
+            foreach (var table in e_bigDB.Tables)
             {
-                using (var archive = new ZipArchive(fileStream, ZipArchiveMode.Update, true))
+                uint current_page = 0u;
+                var web_export_utility = e_bigDB.GetWebExport(table); // TODO: support exporting from different game dbs beyond default
+
+                using (var fs = new FileStream(bigdb_archive_path, FileMode.OpenOrCreate))
                 {
-                    foreach (var table in e_bigDB.Tables)
+                    using (var archive = new ZipArchive(fs, ZipArchiveMode.Update, true))
                     {
                         // create directory for table if doesn't exist
                         var directory = archive.Entries.Any(t => t.Name == table.Name)
                             ? new ZipArchiveDirectory(archive, table.Name)
                             : archive.CreateDirectory(table.Name);
+                    }
+                }
 
-                        var current_page = directory.Archive.Entries.Where(t => t.FullName.StartsWith($"{table.Name}/")).Select(t => uint.Parse(Path.GetFileNameWithoutExtension(t.Name))).OrderByDescending(t => t)?.FirstOrDefault() ?? 0u;
-                        var web_export_utility = e_bigDB.GetWebExport(table); // TODO: support exporting from different game dbs beyond default
+                var hit_end_of_pages = false;
+                while (!hit_end_of_pages)
+                {
+                    current_page++;
 
-                        var hit_end_of_pages = false;
-                        while (!hit_end_of_pages)
+                    var download_page = await web_export_utility.DownloadPage(WebExportOutputFormat.RawJSON, current_page, 100);
+
+                    Log.Information("Downloading database objects from table '{name}' ... (page: {page})", table.Name, current_page);
+
+                    // [] empty array
+                    if (download_page.Length == 2)
+                        hit_end_of_pages = true;
+
+                    if (!hit_end_of_pages)
+                    {
+                        using (var fs = new FileStream(bigdb_archive_path, FileMode.OpenOrCreate))
                         {
-                            current_page++;
-
-                            var download_page = await web_export_utility.DownloadPage(WebExportOutputFormat.RawJSON, current_page, 100);
-
-                            Log.Information("Downloading database objects from table '{name}' ... (page: {page})", table.Name, current_page);
-
-                            // [] empty array
-                            if (download_page.Length == 2)
-                                hit_end_of_pages = true;
-
-                            if (!hit_end_of_pages)
+                            using (var archive = new ZipArchive(fs, ZipArchiveMode.Update, true))
                             {
+                                var directory = new ZipArchiveDirectory(archive, table.Name);
+
                                 var entry = directory.CreateEntry($"{current_page}.page", CompressionLevel.Fastest);
                                 var contents = Encoding.UTF8.GetBytes(download_page);
+
                                 using (var zipStream = entry.Open())
                                     zipStream.Write(contents, 0, contents.Length);
                             }
@@ -188,38 +197,6 @@ namespace CloneTool
 
             Log.Information("The clone operation has successfully completed.");
             await Task.Delay(-1);
-        }
-    }
-
-    public static class ZipArchiveExtension
-    {
-        public static ZipArchiveDirectory CreateDirectory(this ZipArchive @this, string directoryPath)
-        {
-            return new ZipArchiveDirectory(@this, directoryPath);
-        }
-    }
-
-    public class ZipArchiveDirectory
-    {
-        private readonly string _directory;
-        private ZipArchive _archive;
-
-        internal ZipArchiveDirectory(ZipArchive archive, string directory)
-        {
-            _archive = archive;
-            _directory = directory;
-        }
-
-        public ZipArchive Archive { get { return _archive; } }
-
-        public ZipArchiveEntry CreateEntry(string entry)
-        {
-            return _archive.CreateEntry(_directory + "/" + entry);
-        }
-
-        public ZipArchiveEntry CreateEntry(string entry, CompressionLevel compressionLevel)
-        {
-            return _archive.CreateEntry(_directory + "/" + entry, compressionLevel);
         }
     }
 }
