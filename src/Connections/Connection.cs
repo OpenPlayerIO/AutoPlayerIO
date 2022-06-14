@@ -15,6 +15,29 @@ namespace AutoPlayerIO
         public string Description { get; }
 
         /// <summary>
+        /// The method for authentication.
+        /// </summary>
+        public AuthenticationMethod AuthenticationMethod { get; }
+
+        /// <summary>
+        /// The shared secret used for basic connection types.
+        /// </summary>
+        public string SharedSecret { get; }
+
+        /// <summary>
+        /// Whether the connection requires email address.
+        /// </summary>
+        public bool RequireEmailAddress { get; }
+
+        // TODO: Implement captcha.
+        public bool CaptchaEnabled { get; }
+
+        /// <summary>
+        /// The BigDB game database ID the connection belongs to.
+        /// </summary>
+        public string GameDB { get; }
+
+        /// <summary>
         /// The connection access rights for each table.
         /// </summary>
         public List<TableAccessRight> TableAccessRights { get; }

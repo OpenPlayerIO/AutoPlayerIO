@@ -116,6 +116,7 @@ namespace AutoPlayerIO
             AuthenticationMethod authenticationMethod,
             string gameDB,
             List<(Table table, bool can_load_by_keys, bool can_create, bool can_load_by_indexes, bool can_delete, bool creator_has_full_rights, bool can_save)> tablePrivileges,
+            ConnectionRights connectionRights,
             string sharedSecret = null,
             CancellationToken cancellationToken = default)
         {
@@ -163,9 +164,68 @@ namespace AutoPlayerIO
 
             dynamic arguments = new ExpandoObject();
 
+            // This could be minified using ExpandoObject as a dictionary,
+            //      but Player.IO is a mess to begin with, so I don't really care enough to bother.
+            if (connectionRights.CreateMultiplayerRoom)
+                arguments.rr1 = "on";
+            if (connectionRights.JoinMultiplayerRoom)
+                arguments.rr2 = "on";
+            if (connectionRights.ListMultiplayerRooms)
+                arguments.rr3 = "on";
+            if (connectionRights.AccessPayVault)
+                arguments.rr4 = "on";
+            if (connectionRights.CreditPayVault)
+                arguments.rr5 = "on";
+            if (connectionRights.DebitPayVault)
+                arguments.rr6 = "on";
+            if (connectionRights.CanGiveVaultItems)
+                arguments.rr7 = "on";
+            if (connectionRights.CanBuyVaultItems)
+                arguments.rr8 = "on";
+            if (connectionRights.CanConsumeVaultItems)
+                arguments.rr9 = "on";
+            if (connectionRights.CanReadPayVaultHistory)
+                arguments.rr10 = "on";
+            if (connectionRights.CanAwardAchievement)
+                arguments.rr13 = "on";
+            if (connectionRights.AccessAchievement)
+                arguments.rr14 = "on";
+            if (connectionRights.CanLoadAchievements)
+                arguments.rr15 = "on";
+            if (connectionRights.CanSendGameRequests)
+                arguments.rr16 = "on";
+            if (connectionRights.CanAccessGameRequests)
+                arguments.rr17 = "on";
+            if (connectionRights.CanDeleteGameRequests)
+                arguments.rr18 = "on";
+            if (connectionRights.CanSendNotifications)
+                arguments.rr19 = "on";
+            if (connectionRights.CanRegisterNotificationEndpoints)
+                arguments.rr20 = "on";
+            if (connectionRights.CanManageNotifications)
+                arguments.rr21 = "on";
+            if (connectionRights.CanPlayerInsightRefresh)
+                arguments.rr22 = "on";
+            if (connectionRights.CanPlayerInsightSetSegments)
+                arguments.rr23 = "on";
+            if (connectionRights.CanmarkwhoinvitedauserinPlayerInsight)
+                arguments.rr24 = "on";
+            if (connectionRights.CanPlayerInsightTrackEvents)
+                arguments.rr25 = "on";
+            if (connectionRights.CanPlayerInsightTrackExternalPayment)
+                arguments.rr26 = "on";
+            if (connectionRights.CanSetCustomPlayerInsightSegments)
+                arguments.rr27 = "on";
+            if (connectionRights.CanModifyOneScore)
+                arguments.rr28 = "on";
+            if (connectionRights.CanSetLeaderboardScore)
+                arguments.rr29 = "on";
+            if (connectionRights.CanLoadLeaderboardScores)
+                arguments.rr30 = "on";
+
             arguments.Identifier = connectionId;
             arguments.Description = description;
-            arguments.GameDB = gameDB;
+            arguments.GameDB = string.IsNullOrEmpty(gameDB) ? "Default" : gameDB;
             arguments.GameDBName = "";
 
             switch (authenticationMethod)
