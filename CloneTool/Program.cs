@@ -8,6 +8,8 @@ using System.Security;
 using System.Threading.Tasks;
 using System.Linq;
 using AngleSharp.Html.Dom;
+using System.IO;
+using System.IO.Compression;
 
 namespace CloneTool
 {
@@ -58,13 +60,10 @@ namespace CloneTool
             var e_game = client.Games[int.Parse(Console.ReadLine()) - 1];
             var e_bigDB = await e_game.LoadBigDBAsync();
             var e_connections = await e_game.LoadConnectionsAsync();
-            var e_payVault = await e_game.LoadPayVaultAsync();
 
             Log.Information("Selected export game: {name}", e_game.Name);
             Log.Information("BigDB tables count: {count}", e_bigDB.Tables.Count);
             Log.Information("QuickConnect connections count: {count}", e_connections.Count);
-            Log.Information("PayVault information: {coinsUsed} coins used, {coinsAdded} coins added, {startBalance} start balance, {endBalance} end balance.",
-                e_payVault.CoinsUsed, e_payVault.CoinsAdded, e_payVault.StartBalance, e_payVault.EndBalance);
 
             Console.WriteLine();
             Console.WriteLine("Select a game to clone data to.");
@@ -87,6 +86,7 @@ namespace CloneTool
             if (Console.ReadLine().ToLower() != "y")
                 return;
 
+            Console.WriteLine();
             Log.Information("Operation 1. The tables from {export} are being copied into {import}.", e_game.Name, i_game.Name);
 
             var i_bigDB = await i_game.LoadBigDBAsync();
@@ -100,6 +100,7 @@ namespace CloneTool
                 Log.Information("Table created: {name}.", table.Name);
             }
 
+            Console.WriteLine();
             Log.Information("Creating indexes for tables.");
             i_bigDB = await i_game.LoadBigDBAsync(); // reload for new tables
 
@@ -118,6 +119,7 @@ namespace CloneTool
                 }
             }
 
+            Console.WriteLine();
             Log.Information("Operation 2. The connections from {export} are being copied into {import}.", e_game.Name, i_game.Name);
 
             var i_connections = await i_game.LoadConnectionsAsync();
@@ -140,8 +142,84 @@ namespace CloneTool
                 Log.Information("Connection created: {name} with authentication type: {auth}", connection.Name, connection.AuthenticationMethod);
             }
 
+            Console.WriteLine();
+            Log.Information("Operation 3. The database objects from {export} are being copied into {import} - this may take some time.");
+
+            var bigdb_archive_path = Path.Combine(Environment.CurrentDirectory, $"bigdb-{e_game.GameId}.zip");
+
+            using (var fileStream = new FileStream(bigdb_archive_path, FileMode.OpenOrCreate))
+            {
+                using (var archive = new ZipArchive(fileStream, ZipArchiveMode.Update, true))
+                {
+                    foreach (var table in e_bigDB.Tables)
+                    {
+                        // create directory for table if doesn't exist
+                        var directory = archive.Entries.Any(t => t.Name == table.Name)
+                            ? new ZipArchiveDirectory(archive, table.Name)
+                            : archive.CreateDirectory(table.Name);
+
+                        var current_page = directory.Archive.Entries.Where(t => t.FullName.StartsWith($"{table.Name}/")).Select(t => uint.Parse(Path.GetFileNameWithoutExtension(t.Name))).OrderByDescending(t => t)?.FirstOrDefault() ?? 0u;
+                        var web_export_utility = e_bigDB.GetWebExport(table); // TODO: support exporting from different game dbs beyond default
+
+                        var hit_end_of_pages = false;
+                        while (!hit_end_of_pages)
+                        {
+                            current_page++;
+
+                            var download_page = await web_export_utility.DownloadPage(WebExportOutputFormat.RawJSON, current_page, 100);
+
+                            Log.Information("Downloading database objects from table '{name}' ... (page: {page})", table.Name, current_page);
+
+                            // [] empty array
+                            if (download_page.Length == 2)
+                                hit_end_of_pages = true;
+
+                            if (!hit_end_of_pages)
+                            {
+                                var entry = directory.CreateEntry($"{current_page}.page", CompressionLevel.Fastest);
+                                var contents = Encoding.UTF8.GetBytes(download_page);
+                                using (var zipStream = entry.Open())
+                                    zipStream.Write(contents, 0, contents.Length);
+                            }
+                        }
+                    }
+                }
+            }
+
             Log.Information("The clone operation has successfully completed.");
             await Task.Delay(-1);
+        }
+    }
+
+    public static class ZipArchiveExtension
+    {
+        public static ZipArchiveDirectory CreateDirectory(this ZipArchive @this, string directoryPath)
+        {
+            return new ZipArchiveDirectory(@this, directoryPath);
+        }
+    }
+
+    public class ZipArchiveDirectory
+    {
+        private readonly string _directory;
+        private ZipArchive _archive;
+
+        internal ZipArchiveDirectory(ZipArchive archive, string directory)
+        {
+            _archive = archive;
+            _directory = directory;
+        }
+
+        public ZipArchive Archive { get { return _archive; } }
+
+        public ZipArchiveEntry CreateEntry(string entry)
+        {
+            return _archive.CreateEntry(_directory + "/" + entry);
+        }
+
+        public ZipArchiveEntry CreateEntry(string entry, CompressionLevel compressionLevel)
+        {
+            return _archive.CreateEntry(_directory + "/" + entry, compressionLevel);
         }
     }
 }
