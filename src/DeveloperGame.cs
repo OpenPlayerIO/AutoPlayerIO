@@ -248,6 +248,15 @@ namespace AutoPlayerIO
                     arguments.Basic256RequiresAuth = "on";
                     arguments.Basic256AuthSharedSecret = sharedSecret;
                     break;
+
+                case AuthenticationMethod.SimpleUsers:
+                    arguments.AuthProvider = "simple";
+                    break;
+
+                case AuthenticationMethod.SimpleUsersRequireEmail:
+                    arguments.AuthProvider = "simple";
+                    arguments.SimpleRequireEmail = "on";
+                    break;
             }
 
             foreach (var privilege in connection_privileges)
@@ -447,7 +456,10 @@ namespace AutoPlayerIO
                     });
                 }
 
-                connections.Add(new Connection(row.Name, row.Description, connectionProperties, connectionRights, tableAccessRights));
+                var authenticationMethodNode = connectionDetails.QuerySelector("#AuthProvider").Children.First(t => t.HasAttribute("selected")).TextContent;
+                var authenticationMethod = authenticationMethodNode == "SimpleUsers" ? AuthenticationMethod.SimpleUsers : AuthenticationMethod.Basic;
+
+                connections.Add(new Connection(row.Name, row.Description, connectionProperties, connectionRights, tableAccessRights, authenticationMethod));
             }
 
              return connections;

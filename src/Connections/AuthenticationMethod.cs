@@ -6,6 +6,8 @@
     public enum AuthenticationMethod
     {
         Basic,
-        BasicRequiresAuthentication
+        BasicRequiresAuthentication,
+        SimpleUsers,
+        SimpleUsersRequireEmail,
     }
 }

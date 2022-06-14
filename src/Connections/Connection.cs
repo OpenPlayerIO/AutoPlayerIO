@@ -52,13 +52,14 @@ namespace AutoPlayerIO
         /// </summary>
         public Dictionary<string, object> Properties { get; }
 
-        internal Connection(string name, string description, Dictionary<string, object> properties, ConnectionRights rights, List<TableAccessRight> tableAccessRights)
+        internal Connection(string name, string description, Dictionary<string, object> properties, ConnectionRights rights, List<TableAccessRight> tableAccessRights, AuthenticationMethod authenticationMethod)
         {
             this.Name = name;
             this.Description = description;
             this.Properties = properties;
             this.Rights = rights;
             this.TableAccessRights = tableAccessRights;
+            this.AuthenticationMethod = authenticationMethod;
         }
     }
 }
