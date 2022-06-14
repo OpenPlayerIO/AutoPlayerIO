@@ -5,7 +5,7 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoPlayerIO", "src\AutoPlayerIO.csproj", "{C8500B8C-E30D-4099-8C29-663F244C414D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestProject", "TestProject\TestProject.csproj", "{6C56462F-9F26-42B3-B7EA-5738CBC1A134}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CloneTool", "CloneTool\CloneTool.csproj", "{096A6F70-60AC-4248-97B0-5084A736D50E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,10 @@ Global
 		{C8500B8C-E30D-4099-8C29-663F244C414D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C8500B8C-E30D-4099-8C29-663F244C414D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C8500B8C-E30D-4099-8C29-663F244C414D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6C56462F-9F26-42B3-B7EA-5738CBC1A134}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6C56462F-9F26-42B3-B7EA-5738CBC1A134}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6C56462F-9F26-42B3-B7EA-5738CBC1A134}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6C56462F-9F26-42B3-B7EA-5738CBC1A134}.Release|Any CPU.Build.0 = Release|Any CPU
+		{096A6F70-60AC-4248-97B0-5084A736D50E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{096A6F70-60AC-4248-97B0-5084A736D50E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{096A6F70-60AC-4248-97B0-5084A736D50E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{096A6F70-60AC-4248-97B0-5084A736D50E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
