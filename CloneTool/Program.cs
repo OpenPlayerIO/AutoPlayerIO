@@ -160,6 +160,8 @@ namespace CloneTool
                         var directory = archive.Entries.Any(t => t.Name == table.Name)
                             ? new ZipArchiveDirectory(archive, table.Name)
                             : archive.CreateDirectory(table.Name);
+
+                        current_page = directory.Archive.Entries.Where(t => t.FullName.StartsWith($"{table.Name}/")).Select(t => uint.Parse(Path.GetFileNameWithoutExtension(t.Name))).OrderByDescending(t => t)?.FirstOrDefault() ?? 0u;
                     }
                 }
 
@@ -190,6 +192,30 @@ namespace CloneTool
                                 using (var zipStream = entry.Open())
                                     zipStream.Write(contents, 0, contents.Length);
                             }
+                        }
+                    }
+                }
+            }
+
+            Log.Information("All database objects were downloaded successfully. Upload beginning.");
+
+            using (var fs = new FileStream(bigdb_archive_path, FileMode.Open))
+            {
+                using (var archive = new ZipArchive(fs, ZipArchiveMode.Read, true))
+                {
+                    foreach (var entry in archive.Entries.OrderByDescending(t => uint.Parse(Path.GetFileNameWithoutExtension(t.Name))))
+                    {
+                        var table_name = entry.FullName.Split('/')[0];
+                        var database_objects = JsonConvert.DeserializeObject<DatabaseObjectSearchResult[]>(new StreamReader(entry.Open()).ReadToEnd());
+
+                        var table = i_bigDB.Tables.First(t => t.Name == table_name);
+
+                        foreach (var obj in database_objects)
+                        {
+                            var serialized_properties = JsonConvert.SerializeObject(new { properties = obj.properties });
+                            await i_bigDB.CreateOrModifyDatabaseObject(table, obj.title, serialized_properties); // TODO: add support for non-default gameDB
+
+                            Log.Information("Uploaded object {name} to table {table} with {count} properties.", obj.title, table_name, obj.properties.Count);
                         }
                     }
                 }

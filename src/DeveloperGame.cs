@@ -33,10 +33,18 @@ namespace AutoPlayerIO
             var navigationId = (navigationMenu.First() as IHtmlAnchorElement).PathName.Split('/')[4];
             var xsrfToken = (navigationMenu.First() as IHtmlAnchorElement).PathName.Split('/').Last();
 
-            return new DeveloperGame(client, xsrfToken, name, navigationId, gameId);
+            var internalGameId = uint.Parse((await client.Request($"/my/payvault/start/{navigationId}/{xsrfToken}").GetAsync())
+                .ResponseMessage.RequestMessage.RequestUri.Segments[5].TrimEnd('/'));
+
+            return new DeveloperGame(client, xsrfToken, name, navigationId, gameId, internalGameId);
         }
 
         private string XSRFToken { get; }
+
+        /// <summary>
+        /// The unique ID of the game, used internally by Player.IO.
+        /// </summary>
+        public uint Id { get; }
 
         /// <summary>
         /// The name of the game.
@@ -49,14 +57,14 @@ namespace AutoPlayerIO
         public string NavigationId { get; }
 
         /// <summary>
-        /// The unique ID of the game.
+        /// The unique ConnectGameId of the game.
         /// </summary>
         public string GameId { get; }
 
         // internal is used to workaround the other parts of this library requiring FlurlClient
         internal readonly CookieSession _client;
 
-        private DeveloperGame(CookieSession client, string xsrfToken, string name, string navigationId, string gameId)
+        private DeveloperGame(CookieSession client, string xsrfToken, string name, string navigationId, string gameId, uint internalGameId)
         {
             _client = client;
 
@@ -64,6 +72,7 @@ namespace AutoPlayerIO
             this.Name = name;
             this.NavigationId = navigationId;
             this.GameId = gameId;
+            this.Id = internalGameId;
         }
 
         /// <summary>

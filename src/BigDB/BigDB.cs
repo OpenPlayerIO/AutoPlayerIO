@@ -132,6 +132,26 @@ namespace AutoPlayerIO
         }
 
         /// <summary>
+        /// Create/modify database object for a given table and key.
+        /// </summary>
+        public async Task CreateOrModifyDatabaseObject(Table table, string key, string jsonProperties, string gameDb = "1")
+        {
+            if (table is null)
+                throw new ArgumentNullException(nameof(table));
+
+            if (string.IsNullOrEmpty(key))
+                throw new ArgumentException($"'{nameof(key)}' cannot be null or empty.", nameof(key));
+
+            if (string.IsNullOrEmpty(jsonProperties))
+                throw new ArgumentException($"'{nameof(jsonProperties)}' cannot be null or empty.", nameof(jsonProperties));
+
+            //https://playerio.com/my/bigdb/changeobject/test/PlayerObjects/45435/1/vyd7moiurgunrmfbwrkwe1btoro?key=test
+            var response = await _client.Request($"/my/bigdb/changeobject/{this.Game.Name.ToLower()}/{table.Name}/{this.Game.Id}/{gameDb}/{_xsrfToken}?key=" + Uri.EscapeUriString(key))
+                .PostMultipartAsync(t => t.AddString("jsonObject", jsonProperties))
+                .ConfigureAwait(false);
+        }
+
+        /// <summary>
         /// Create a table in BigDB.
         /// </summary>
         /// <param name="name"> The name of the table. </param>
