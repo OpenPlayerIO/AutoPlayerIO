@@ -143,7 +143,7 @@ namespace CloneTool
             }
 
             Console.WriteLine();
-            Log.Information("Operation 3. The database objects from {export} are being copied into {import} - this may take some time.");
+            Log.Information("Operation 3. The database objects from {export} are being copied into {import} - this may take some time.", e_game.Name, i_game.Name);
 
             var bigdb_archive_path = Path.Combine(Environment.CurrentDirectory, $"bigdb-{e_game.GameId}.zip");
 
