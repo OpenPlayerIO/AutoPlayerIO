@@ -4,7 +4,7 @@
     <OutputType>Library</OutputType>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Authors>Atilla Lonny</Authors>
+    <Authors>miou</Authors>
     <Company />
     <Product />
     <Description>A library designed to parse the Player.IO website and automate the website dashboard.</Description>
@@ -14,7 +14,7 @@
     <RepositoryUrl>https://github.com/OpenPlayerIO/AutoPlayerIO</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
     <PackageTags>AutoPlayerIO, PlayerIO, Player.IO</PackageTags>
-    <Version>1.2.0</Version>
+    <Version>1.3.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

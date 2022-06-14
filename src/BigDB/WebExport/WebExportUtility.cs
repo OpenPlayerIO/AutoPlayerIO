@@ -1,6 +1,7 @@
 ﻿using Flurl.Http;
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -37,16 +38,26 @@ namespace AutoPlayerIO
             _gameDbId = gameDbId;
         }
 
+        /// <summary>
+        /// Download a page of database objects from the specified table, in the specified format.
+        /// </summary>
+        /// <param name="format"> The format to deserialize into. </param>
+        /// <param name="pageNum"> The page number. </param>
+        /// <param name="pageSize"> The page size. </param>
         public async Task<string> DownloadPage(WebExportOutputFormat format, uint pageNum, uint pageSize = 100)
         {
             if (pageSize == 0)
                 throw new ArgumentOutOfRangeException(nameof(pageSize), pageSize, "The page size has to be a non-zero value.");
 
+            dynamic arguments = new ExpandoObject();
+            arguments.page = pageNum;
+            arguments.pageSize = pageSize;
+
             var response = await _client.Request((string)$"/my/bigdb/searchall/{_game.NavigationId}/{_gameDbId}/{_table.Id}/{_xsrfToken}")
-                .LoadDocumentAsync()
+                .PostUrlEncodedAsync((object)arguments)
                 .ConfigureAwait(false);
 
-            var json = response.DocumentElement.TextContent;
+            var json = await response.GetStringAsync();
 
             switch (format)
             {
