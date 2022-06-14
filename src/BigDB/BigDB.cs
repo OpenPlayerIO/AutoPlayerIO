@@ -105,6 +105,33 @@ namespace AutoPlayerIO
         }
 
         /// <summary>
+        /// Create/modify an index for a table in BigDB.
+        /// </summary>
+        /// <param name="table"> The table index to create or modify. </param>
+        /// <param name="indexName"> The name of the index to create or modify. </param>
+        /// <param name="indexProperties"> The properties the index should contain. </param>
+        public async Task CreateOrModifyIndex(Table table, string indexName, List<IndexProperty> indexProperties)
+        {
+            if (table is null)
+                throw new ArgumentNullException(nameof(table));
+
+            if (string.IsNullOrEmpty(indexName))
+                throw new ArgumentException($"'{nameof(indexName)}' cannot be null or empty.", nameof(indexName));
+
+            if (indexProperties is null)
+                throw new ArgumentNullException(nameof(indexProperties));
+
+            dynamic arguments = new ExpandoObject();
+
+            arguments.Name = indexName;
+            arguments.SerializedProperties = string.Join(",", indexProperties.Select(t => $"{Enum.GetName(typeof(IndexPropertyType), t.Type)}:{Enum.GetName(typeof(IndexPropertyOrder), t.Order)}:{t.Name}"));
+
+            await _client.Request($"/my/bigdb/editindex/{this.Game.Name.ToLower()}/{table.Id}/{_xsrfToken}/")
+                .PostUrlEncodedAsync((object)arguments)
+                .ConfigureAwait(false);
+        }
+
+        /// <summary>
         /// Create a table in BigDB.
         /// </summary>
         /// <param name="name"> The name of the table. </param>
