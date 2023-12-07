@@ -94,20 +94,6 @@ namespace CloneTool
 
 		public static async Task LocalSaveOperation(DeveloperAccount client, bool shallow, bool zippityquick = false, string archivesDirectory = "")
 		{
-			if (!Directory.Exists(archivesDirectory))
-			{
-				Log.Error("The directory specified does not exist.");
-				return;
-			}
-
-			var archive_files = Directory.GetFiles(archivesDirectory, "*.zip", SearchOption.TopDirectoryOnly).ToList();
-
-			if (archive_files.Count == 0)
-			{
-				Log.Error("The directory specified does not contain any .zip files.");
-				return;
-			}
-
 			Console.WriteLine($"Select a game to clone locally. (1-{client.Games.Count()})");
 
 			for (int i = 0; i < client.Games.Count; i++)
@@ -156,6 +142,20 @@ namespace CloneTool
 				}
 				else
 				{
+					if (!Directory.Exists(archivesDirectory))
+					{
+						Log.Error("The directory specified does not exist.");
+						return;
+					}
+
+					var archive_files = Directory.GetFiles(archivesDirectory, "*.zip", SearchOption.TopDirectoryOnly).ToList();
+
+					if (archive_files.Count == 0)
+					{
+						Log.Error("The directory specified does not contain any .zip files.");
+						return;
+					}
+
 					var shared_secret = Guid.NewGuid().ToString() + RandomNumberGenerator.GetInt32(int.MaxValue).ToString();
 					var tables = (await game.LoadBigDBAsync()).Tables;
 					var connection_rights = new ConnectionRights() { };
