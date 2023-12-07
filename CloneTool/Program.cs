@@ -130,6 +130,19 @@ namespace CloneTool
 			File.WriteAllText(Path.Combine(saveDirectory, "tables.json"), JsonConvert.SerializeObject(bigDB.Tables, Formatting.Indented));
 			Log.Information("Tables saved.");
 
+			Log.Information("Merging into 'game.json' ...");
+
+			File.WriteAllText(Path.Combine(saveDirectory, "game.json"), JsonConvert.SerializeObject(new Game()
+			{
+				ConnectGameId = game.GameId,
+				GameName = game.Name,
+				Id = game.Id,
+				Connections = connections,
+				Tables = bigDB.Tables
+			}, Formatting.Indented));
+
+			Log.Information("Done.");
+
 			if (!shallow)
 			{
 				Log.Information("Downloading database objects. This may take a long time depending on how many objects there are.");
@@ -507,5 +520,23 @@ namespace CloneTool
 			ValueType.DateTime => new ValueObject(ValueType.DateTime, default, default, default, default, default, default, default, default, Convert.ToInt64(value), default, default),
 			_ => throw new NotImplementedException(),
 		};
+
+		public class Game
+		{
+			public uint Id { get; set; }
+
+			public string ConnectGameId { get; set; }
+
+			public string GameName { get; set; }
+
+			public List<AutoPlayerIO.Connection> Connections { get; set; }
+
+			public List<Table> Tables { get; set; }
+
+			public Game()
+			{
+
+			}
+		}
 	}
 }
