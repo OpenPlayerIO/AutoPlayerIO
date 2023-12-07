@@ -119,15 +119,15 @@ namespace CloneTool
 			Directory.CreateDirectory(saveDirectory);
 
 			Log.Information("Saving connections.");
-			File.WriteAllText(Path.Combine(saveDirectory, "connections.json"), JsonConvert.SerializeObject(connections));
+			File.WriteAllText(Path.Combine(saveDirectory, "connections.json"), JsonConvert.SerializeObject(connections, Formatting.Indented));
 			Log.Information("Connections saved.");
 
 			Log.Information("Saving payvault.");
-			File.WriteAllText(Path.Combine(saveDirectory, "payvault.json"), JsonConvert.SerializeObject(payvault));
+			File.WriteAllText(Path.Combine(saveDirectory, "payvault.json"), JsonConvert.SerializeObject(payvault, Formatting.Indented));
 			Log.Information("PayVault saved.");
 
 			Log.Information("Saving tables.");
-			File.WriteAllText(Path.Combine(saveDirectory, "tables.json"), JsonConvert.SerializeObject(bigDB.Tables));
+			File.WriteAllText(Path.Combine(saveDirectory, "tables.json"), JsonConvert.SerializeObject(bigDB.Tables, Formatting.Indented));
 			Log.Information("Tables saved.");
 
 			if (!shallow)
@@ -159,7 +159,6 @@ namespace CloneTool
 					var shared_secret = Guid.NewGuid().ToString() + RandomNumberGenerator.GetInt32(int.MaxValue).ToString();
 					var tables = (await game.LoadBigDBAsync()).Tables;
 					var connection_rights = new ConnectionRights() { };
-
 
 					// delete export connection if already exists
 					while (true)
