@@ -145,7 +145,6 @@ namespace AutoPlayerIO
             if (string.IsNullOrEmpty(jsonProperties))
                 throw new ArgumentException($"'{nameof(jsonProperties)}' cannot be null or empty.", nameof(jsonProperties));
 
-            //https://playerio.com/my/bigdb/changeobject/test/PlayerObjects/45435/1/vyd7moiurgunrmfbwrkwe1btoro?key=test
             var response = await _client.Request($"/my/bigdb/changeobject/{this.Game.Name.ToLower()}/{table.Name}/{this.Game.Id}/{gameDb}/{_xsrfToken}?key=" + Uri.EscapeUriString(key))
                 .PostMultipartAsync(t => t.AddString("jsonObject", jsonProperties))
                 .ConfigureAwait(false);
